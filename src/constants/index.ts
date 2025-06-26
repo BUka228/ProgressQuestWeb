@@ -9,6 +9,7 @@ export const ROUTES = {
   REGISTER: '/register',
   DASHBOARD: '/app',
   TASKS: '/app/tasks',
+  WORKSPACES: '/app/workspaces',
   PROJECTS: '/app/projects',
   GARDEN: '/app/garden',
   ANALYTICS: '/app/analytics',

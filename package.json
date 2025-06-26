@@ -12,7 +12,10 @@
     "lint:fix": "eslint src --ext ts,tsx --fix",
     "type-check": "tsc --noEmit",
     "serve": "firebase serve --only hosting",
-    "deploy": "npm run build && firebase deploy --only hosting"
+    "deploy": "npm run build && firebase deploy --only hosting",
+    "emulators": "firebase emulators:start --project=demo-test",
+    "emulators:ui": "firebase emulators:start --only functions,firestore,auth,storage --project=demo-test",
+    "dev:emulator": "concurrently \"firebase emulators:start --project=demo-test\" \"npm run dev\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",

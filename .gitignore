@@ -182,3 +182,4 @@ dist
 .history/
 
 # END https://www.toptal.com/developers/gitignore/api/react,typescript,vite,firebase,visualstudiocode,node
+merged_ts_files.txt

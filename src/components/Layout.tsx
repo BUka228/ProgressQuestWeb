@@ -7,6 +7,7 @@ import { cn } from '@/utils/helpers'
 import { ROUTES } from '@/constants'
 import { DemoBanner } from './DemoBanner'
 import { CreateTaskModal } from './CreateTaskModal'
+import { WorkspaceSwitcher } from './WorkspaceSwitcher'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -15,6 +16,7 @@ interface LayoutProps {
 const navigation = [
   { name: 'Панель', href: ROUTES.DASHBOARD, icon: '📊' },
   { name: 'Задачи', href: ROUTES.TASKS, icon: '✅' },
+  { name: 'Пространства', href: ROUTES.WORKSPACES, icon: '🏢' },
   { name: 'Проекты', href: ROUTES.PROJECTS, icon: '📁' },
   { name: 'Сад', href: ROUTES.GARDEN, icon: '🌱' },
   { name: 'Аналитика', href: ROUTES.ANALYTICS, icon: '📈' },
@@ -184,6 +186,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </button>
           
           <div className="flex items-center space-x-4">
+            {/* Workspace Switcher */}
+            <WorkspaceSwitcher className="w-64" compact={false} />
+            
             {/* Quick actions */}
             <button
               onClick={() => setIsCreateTaskModalOpen(true)}

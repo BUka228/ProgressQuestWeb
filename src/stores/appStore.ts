@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import { User, Workspace, Project } from '@/types'
+import { WorkspaceClientDto } from '@/services/workspaceService'
 
 interface AppState {
   // User state
