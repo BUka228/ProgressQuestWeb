@@ -37,10 +37,10 @@ if (import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true
     // (например, Docker или WSL2) может потребоваться явное указание IP.
     const host = 'localhost';
     
-    connectAuthEmulator(auth, `http://${host}:9099`, { disableWarnings: true });
-    connectFirestoreEmulator(db, host, 8080);
-    connectFunctionsEmulator(functions, host, 5001);
-    connectStorageEmulator(storage, host, 9199);
+    //connectAuthEmulator(auth, `http://${host}:9099`, { disableWarnings: true });
+    //connectFirestoreEmulator(db, host, 8080);
+    //connectFunctionsEmulator(functions, host, 5001);
+    //(storage, host, 9199);
     
     console.log("Successfully connected to Firebase emulators.");
   } catch (error) {
