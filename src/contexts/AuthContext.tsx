@@ -66,6 +66,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         case 'auth/too-many-requests':
           toast.error('Слишком много неудачных попыток. Попробуйте позже')
           break
+        case 'auth/network-request-failed':
+          toast.error('Ошибка подключения к серверу. Проверьте интернет соединение')
+          break
         default:
           toast.error('Ошибка входа: ' + error.message)
       }
@@ -91,6 +94,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         case 'auth/invalid-email':
           toast.error('Неверный формат email')
           break
+        case 'auth/network-request-failed':
+          toast.error('Ошибка подключения к серверу. Проверьте интернет соединение')
+          break
         default:
           toast.error('Ошибка регистрации: ' + error.message)
       }
@@ -115,7 +121,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       toast.success('Успешный вход через Google!')
     } catch (error: any) {
       console.error('Google login error:', error)
-      if (error.code !== 'auth/popup-closed-by-user') {
+      if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+        // Пользователь закрыл окно - не показываем ошибку
+        return
+      } else if (error.code === 'auth/network-request-failed') {
+        toast.error('Ошибка подключения к серверу. Проверьте интернет соединение')
+      } else {
         toast.error('Ошибка входа через Google: ' + error.message)
       }
       throw error
@@ -135,6 +146,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         case 'auth/invalid-email':
           toast.error('Неверный формат email')
           break
+        case 'auth/network-request-failed':
+          toast.error('Ошибка подключения к серверу. Проверьте интернет соединение')
+          break
         default:
           toast.error('Ошибка сброса пароля: ' + error.message)
       }
@@ -150,7 +164,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     } catch (error: any) {
       console.error('Profile update error:', error)
-      toast.error('Ошибка обновления профиля: ' + error.message)
+      if (error.code === 'auth/network-request-failed') {
+        toast.error('Ошибка подключения к серверу. Проверьте интернет соединение')
+      } else {
+        toast.error('Ошибка обновления профиля: ' + error.message)
+      }
       throw error
     }
   }
@@ -171,6 +189,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
           break
         case 'auth/weak-password':
           toast.error('Новый пароль должен содержать минимум 6 символов')
+          break
+        case 'auth/network-request-failed':
+          toast.error('Ошибка подключения к серверу. Проверьте интернет соединение')
           break
         default:
           toast.error('Ошибка изменения пароля: ' + error.message)

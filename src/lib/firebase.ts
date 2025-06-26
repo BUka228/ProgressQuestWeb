@@ -28,13 +28,14 @@ const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();
 
 // --- Эмуляторы (для локальной разработки) ---
-if (import.meta.env.DEV) {
+// Подключаемся к эмуляторам только если явно указано в переменных окружения
+if (import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true') {
   try {
     console.log("DEV mode detected. Connecting to Firebase emulators...");
     
     // Firebase по умолчанию использует localhost, но для некоторых систем
     // (например, Docker или WSL2) может потребоваться явное указание IP.
-    const host = window.location.hostname;
+    const host = 'localhost';
     
     connectAuthEmulator(auth, `http://${host}:9099`, { disableWarnings: true });
     connectFirestoreEmulator(db, host, 8080);
@@ -45,6 +46,8 @@ if (import.meta.env.DEV) {
   } catch (error) {
     console.error("Error connecting to Firebase emulators:", error);
   }
+} else if (import.meta.env.DEV) {
+  console.log("DEV mode detected, but using production Firebase services.");
 }
 
 // Экспорт готовых к использованию инстансов

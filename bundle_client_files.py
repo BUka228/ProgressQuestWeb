@@ -1,7 +1,7 @@
 import os
 
 def bundle_files(start_path, output_file):
-    ignore_dirs = ['node_modules', 'dist']
+    ignore_dirs = ['node_modules', 'dist', 'build', 'coverage', '.git', '.vscode', '__pycache__']
     ignore_files = ['package-lock.json', os.path.basename(output_file)]
 
     with open(output_file, 'w', encoding='utf-8') as outfile:
