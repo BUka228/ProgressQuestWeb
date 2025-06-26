@@ -61,8 +61,6 @@ export class TaskService {
         status: 'TODO',
         priority: taskData.priority,
         tags: taskData.tags || [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
         pomodoroCount: 0,
         attachments: [],
         comments: [],
