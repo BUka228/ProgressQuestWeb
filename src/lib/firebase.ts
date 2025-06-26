@@ -1,10 +1,10 @@
 // /ProgressQuestWeb/src/lib/firebase.ts
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, connectAuthEmulator } from "firebase/auth";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
-import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
-import { getStorage, connectStorageEmulator } from "firebase/storage";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getFunctions } from "firebase/functions";
+import { getStorage } from "firebase/storage";
 
 // Конфигурация Firebase, считываемая из переменных окружения Vite
 const firebaseConfig = {
@@ -23,32 +23,16 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 // Получение инстансов сервисов
 const auth = getAuth(app);
 const db = getFirestore(app);
-const functions = getFunctions(app, import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || "europe-west1");
+const functions = getFunctions(app, import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || "us-central1");
 const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();
 
-// --- Эмуляторы (для локальной разработки) ---
-// Подключаемся к эмуляторам только если явно указано в переменных окружения
-if (import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true') {
-  try {
-    console.log("DEV mode detected. Connecting to Firebase emulators...");
-    
-    // Firebase по умолчанию использует localhost, но для некоторых систем
-    // (например, Docker или WSL2) может потребоваться явное указание IP.
-    const host = 'localhost';
-    
-    //connectAuthEmulator(auth, `http://${host}:9099`, { disableWarnings: true });
-    //connectFirestoreEmulator(db, host, 8080);
-    //connectFunctionsEmulator(functions, host, 5001);
-    //(storage, host, 9199);
-    
-    console.log("Successfully connected to Firebase emulators.");
-  } catch (error) {
-    console.error("Error connecting to Firebase emulators:", error);
-  }
-} else if (import.meta.env.DEV) {
-  console.log("DEV mode detected, but using production Firebase services.");
-}
+// Продакшен версия - эмуляторы отключены
+console.log('Firebase initialized for production');
+
+// Настройка Google Auth Provider
+googleProvider.addScope('email');
+googleProvider.addScope('profile');
 
 // Экспорт готовых к использованию инстансов
 export { app, auth, db, functions, storage, googleProvider };

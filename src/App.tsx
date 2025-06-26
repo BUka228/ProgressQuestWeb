@@ -13,6 +13,7 @@ import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { TasksPage } from '@/pages/TasksPage'
+import { WorkspacesPage } from '@/pages/WorkspacePage'
 import { ProjectsPage } from '@/pages/ProjectsPage'
 import { GardenPage } from '@/pages/GardenPage'
 import { AnalyticsPage } from '@/pages/AnalyticsPage'
@@ -59,6 +60,7 @@ function App() {
                         <Routes>
                           <Route index element={<DashboardPage />} />
                           <Route path="tasks" element={<TasksPage />} />
+                          <Route path="workspaces" element={<WorkspacesPage />} />
                           <Route path="projects" element={<ProjectsPage />} />
                           <Route path="garden" element={<GardenPage />} />
                           <Route path="analytics" element={<AnalyticsPage />} />

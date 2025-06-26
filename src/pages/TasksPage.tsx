@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { CreateTaskModal } from '@/components/CreateTaskModal';
 
 export const TasksPage = () => {

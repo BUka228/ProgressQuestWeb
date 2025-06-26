@@ -183,4 +183,7 @@ dist
 
 # END https://www.toptal.com/developers/gitignore/api/react,typescript,vite,firebase,visualstudiocode,node
 merged_ts_files.txt
+<<<<<<< HEAD
 FIREBASE_SETUP_REAL.md
+=======
+>>>>>>> 1802feae3115fba0accaa8969680cbcbe6469ed0
