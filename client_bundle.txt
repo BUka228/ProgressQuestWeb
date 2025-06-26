@@ -1,0 +1,4823 @@
+--- .env.example ---
+
+# Firebase Configuration
+VITE_FIREBASE_API_KEY=your_api_key_here
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+VITE_FIREBASE_APP_ID=1:123456789:web:abcdefghijklmnop
+
+# Application Configuration
+VITE_APP_NAME=ProgressQuest Universal
+VITE_APP_VERSION=1.0.0
+VITE_APP_ENVIRONMENT=production
+
+# API Configuration
+VITE_API_BASE_URL=https://api.progressquest.com
+VITE_API_TIMEOUT=30000
+
+# Analytics
+VITE_GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
+
+# Feature Flags
+VITE_ENABLE_ANALYTICS=true
+VITE_ENABLE_NOTIFICATIONS=true
+VITE_ENABLE_GARDEN=true
+VITE_ENABLE_COLLABORATION=true
+
+# External Services
+VITE_SUPPORT_EMAIL=support@progressquest.com
+VITE_FEEDBACK_URL=https://feedback.progressquest.com
+
+
+--- .env.local ---
+
+# Firebase Configuration (demo values - replace with your own)
+VITE_FIREBASE_API_KEY=demo_api_key
+VITE_FIREBASE_AUTH_DOMAIN=demo-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=demo-project
+VITE_FIREBASE_STORAGE_BUCKET=demo-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+VITE_FIREBASE_APP_ID=1:123456789:web:abcdefghijklmnop
+
+# Application Configuration
+VITE_APP_NAME=ProgressQuest Universal
+VITE_APP_VERSION=1.0.0
+VITE_APP_ENVIRONMENT=development
+
+# API Configuration
+VITE_API_BASE_URL=https://api.progressquest.com
+VITE_API_TIMEOUT=30000
+
+# Analytics
+VITE_GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
+
+# Feature Flags
+VITE_ENABLE_ANALYTICS=true
+VITE_ENABLE_NOTIFICATIONS=true
+VITE_ENABLE_GARDEN=true
+VITE_ENABLE_COLLABORATION=true
+
+# External Services
+VITE_SUPPORT_EMAIL=support@progressquest.com
+VITE_FEEDBACK_URL=https://feedback.progressquest.com
+
+
+--- .eslintrc.cjs ---
+
+module.exports = {
+  root: true,
+  env: { browser: true, es2020: true },
+  extends: [
+    'eslint:recommended',
+    '@typescript-eslint/recommended',
+    'plugin:react-hooks/recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:react/recommended',
+  ],
+  ignorePatterns: ['dist', '.eslintrc.cjs'],
+  parser: '@typescript-eslint/parser',
+  plugins: ['react-refresh', '@typescript-eslint', 'react'],
+  settings: {
+    react: {
+      version: 'detect',
+    },
+  },
+  rules: {
+    'react-refresh/only-export-components': [
+      'warn',
+      { allowConstantExport: true },
+    ],
+    'react/react-in-jsx-scope': 'off',
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-explicit-any': 'warn',
+    'prefer-const': 'error',
+    'no-var': 'error',
+  },
+}
+
+
+--- bundle_client_files.py ---
+
+import os
+
+def bundle_files(start_path, output_file):
+    ignore_dirs = ['node_modules', 'dist']
+    ignore_files = ['package-lock.json', os.path.basename(output_file)]
+
+    with open(output_file, 'w', encoding='utf-8') as outfile:
+        for root, dirs, files in os.walk(start_path):
+            # Exclude specified directories
+            dirs[:] = [d for d in dirs if d not in ignore_dirs]
+            
+            for file in files:
+                if file in ignore_files:
+                    continue
+                
+                file_path = os.path.join(root, file)
+                relative_path = os.path.relpath(file_path, start_path)
+                
+                outfile.write(f"--- {relative_path.replace(os.sep, '/')} ---\n\n")
+                try:
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as infile:
+                        outfile.write(infile.read())
+                        outfile.write('\n\n')
+                except Exception as e:
+                    outfile.write(f"Could not read file: {e}\n\n")
+
+if __name__ == '__main__':
+    client_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+    output_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'client_bundle.txt')
+    
+    if os.path.isdir(client_path):
+        bundle_files(client_path, output_file_path)
+        print(f"All files from '{client_path}' have been bundled into '{output_file_path}'")
+    else:
+        print(f"Error: Directory not found at '{client_path}'")
+
+
+
+--- firebase.json ---
+
+{
+  "hosting": {
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|jsx|ts|tsx)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=31536000"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(css|scss)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=31536000"
+          }
+        ]
+      },
+      {
+        "source": "/service-worker.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": {
+    "predeploy": [
+      "npm --prefix \"$RESOURCE_DIR\" run lint",
+      "npm --prefix \"$RESOURCE_DIR\" run build"
+    ]
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}
+
+
+--- firestore.indexes.json ---
+
+{
+  "indexes": [
+    {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "workspaceId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "assigneeId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "dueDate",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "projectId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "priority",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "pomodoroSessions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "startTime",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isRead",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "userAchievements",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "unlockedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "tasks",
+      "fieldPath": "tags",
+      "indexes": [
+        {
+          "order": "ASCENDING",
+          "queryScope": "COLLECTION"
+        },
+        {
+          "arrayConfig": "CONTAINS",
+          "queryScope": "COLLECTION"
+        }
+      ]
+    }
+  ]
+}
+
+
+--- firestore.rules ---
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read and write their own user document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Workspaces - users can read/write workspaces they're members of
+    match /workspaces/{workspaceId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid in resource.data.memberIds;
+      allow create: if request.auth != null;
+    }
+    
+    // Projects - users can read/write projects in workspaces they're members of
+    match /projects/{projectId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid in get(/databases/$(database)/documents/workspaces/$(resource.data.workspaceId)).data.memberIds;
+      allow create: if request.auth != null;
+    }
+    
+    // Tasks - users can read/write tasks in workspaces they're members of
+    match /tasks/{taskId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid in get(/databases/$(database)/documents/workspaces/$(resource.data.workspaceId)).data.memberIds;
+      allow create: if request.auth != null;
+    }
+    
+    // Pomodoro sessions - users can only access their own sessions
+    match /pomodoroSessions/{sessionId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null;
+    }
+    
+    // User achievements - users can only read their own achievements
+    match /userAchievements/{achievementId} {
+      allow read: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      allow write: if false; // Only server can write achievements
+    }
+    
+    // Garden plants - users can read all, write only their own
+    match /gardenPlants/{plantId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Only server can modify plant definitions
+    }
+    
+    // User garden plants - users can only access their own
+    match /userGardenPlants/{userPlantId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null;
+    }
+    
+    // Notifications - users can only access their own
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      allow write: if false; // Only server can write notifications
+    }
+    
+    // Analytics - users can only read their own data
+    match /analytics/{analyticsId} {
+      allow read: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      allow write: if false; // Only server can write analytics
+    }
+    
+    // Custom views - users can read/write their own views
+    match /customViews/{viewId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.createdById;
+      allow create: if request.auth != null;
+    }
+  }
+}
+
+
+--- index.html ---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ProgressQuest Universal</title>
+    <meta name="description" content="Boost your productivity with gamified task management and Pomodoro technique" />
+    <meta name="theme-color" content="#3b82f6" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
+
+--- package.json ---
+
+{
+  "name": "progressquest-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "ProgressQuest Universal - Web App",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint src --ext ts,tsx --fix",
+    "type-check": "tsc --noEmit",
+    "serve": "firebase serve --only hosting",
+    "deploy": "npm run build && firebase deploy --only hosting"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.3.2",
+    "@radix-ui/react-avatar": "^1.0.4",
+    "@radix-ui/react-checkbox": "^1.0.4",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-popover": "^1.0.7",
+    "@radix-ui/react-progress": "^1.0.3",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-separator": "^1.0.3",
+    "@radix-ui/react-slider": "^1.1.2",
+    "@radix-ui/react-switch": "^1.0.3",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "@radix-ui/react-tooltip": "^1.0.7",
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tanstack/react-query": "^5.12.2",
+    "@tanstack/react-query-devtools": "^5.13.3",
+    "@types/react-beautiful-dnd": "^13.1.8",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "cmdk": "^0.2.0",
+    "date-fns": "^2.30.0",
+    "firebase": "^10.7.1",
+    "framer-motion": "^10.16.16",
+    "immer": "^10.0.3",
+    "lucide-react": "^0.294.0",
+    "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-day-picker": "^8.9.1",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.48.2",
+    "react-router-dom": "^6.20.1",
+    "recharts": "^2.8.0",
+    "sonner": "^1.2.4",
+    "tailwind-merge": "^2.0.0",
+    "tailwindcss-animate": "^1.0.7",
+    "vaul": "^0.7.9",
+    "zod": "^3.22.4",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.53.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.4",
+    "firebase-tools": "^12.9.1",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.5",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+
+
+--- postcss.config.js ---
+
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+
+
+--- README.md ---
+
+# ProgressQuest Universal - Web Application
+
+Полнофункциональное веб-приложение для повышения продуктивности с элементами геймификации.
+
+## 🌟 Особенности
+
+- **Управление задачами** - Создание, редактирование и отслеживание задач
+- **Система проектов** - Организация задач по проектам
+- **Pomodoro таймер** - Техника Pomodoro для фокусировки
+- **Геймификация** - XP, уровни, достижения и стрики
+- **Виртуальный сад** - Выращивание растений за выполнение задач
+- **Аналитика** - Подробная статистика продуктивности
+- **Темная/светлая тема** - Переключение тем
+- **Реальное время** - Синхронизация данных в реальном времени
+- **Адаптивный дизайн** - Работает на всех устройствах
+
+## 🛠 Технологический стек
+
+### Frontend
+- **React 18** - UI библиотека
+- **TypeScript** - Типизированный JavaScript
+- **Vite** - Сборщик и инструмент разработки
+- **Tailwind CSS** - CSS фреймворк
+- **Radix UI** - Компоненты интерфейса
+
+### State Management
+- **Zustand** - Управление состоянием
+- **React Query** - Кэширование и синхронизация данных
+- **Immer** - Иммутабельные обновления
+
+### Backend & Database
+- **Firebase** - Backend-as-a-Service
+  - Authentication - Аутентификация пользователей
+  - Firestore - NoSQL база данных
+  - Cloud Functions - Серверная логика
+  - Storage - Хранение файлов
+  - Hosting - Хостинг приложения
+
+### Development Tools
+- **ESLint** - Линтер JavaScript/TypeScript
+- **Prettier** - Форматтер кода
+- **Husky** - Git hooks
+
+## 🚀 Быстрый старт
+
+### Предварительные требования
+
+- Node.js 18.0.0 или выше
+- npm или yarn
+- Firebase аккаунт
+
+### Установка
+
+1. **Клонирование репозитория**
+```bash
+git clone https://github.com/your-username/progressquest-universal.git
+cd progressquest-universal
+```
+
+2. **Установка зависимостей**
+```bash
+npm install
+```
+
+3. **Настройка Firebase**
+
+   a. Создайте новый проект в [Firebase Console](https://console.firebase.google.com/)
+   
+   b. Включите следующие сервисы:
+   - Authentication (Email/Password, Google)
+   - Firestore Database
+   - Storage
+   - Hosting
+
+   c. Скопируйте конфигурацию Firebase из настроек проекта
+
+4. **Настройка переменных окружения**
+
+Создайте файл `.env.local` в корне проекта:
+
+```env
+VITE_FIREBASE_API_KEY=your_api_key_here
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+VITE_FIREBASE_APP_ID=1:123456789:web:abcdefghijklmnop
+
+VITE_APP_NAME=ProgressQuest Universal
+VITE_APP_VERSION=1.0.0
+VITE_APP_ENVIRONMENT=development
+
+VITE_ENABLE_ANALYTICS=true
+VITE_ENABLE_NOTIFICATIONS=true
+VITE_ENABLE_GARDEN=true
+VITE_ENABLE_COLLABORATION=true
+```
+
+5. **Настройка Firestore правил безопасности**
+
+Скопируйте содержимое `firestore.rules` в Firebase Console > Firestore Database > Rules
+
+6. **Настройка индексов Firestore**
+
+Импортируйте `firestore.indexes.json` в Firebase Console или создайте индексы автоматически при первых запросах
+
+### Запуск проекта
+
+```bash
+# Режим разработки
+npm run dev
+
+# Сборка для продакшена
+npm run build
+
+# Предварительный просмотр продакшен сборки
+npm run preview
+
+# Линтинг
+npm run lint
+
+# Проверка типов
+npm run type-check
+```
+
+## 📁 Структура проекта
+
+```
+src/
+├── components/          # React компоненты
+│   ├── ui/             # Базовые UI компоненты
+│   ├── Layout.tsx      # Основной макет
+│   └── ProtectedRoute.tsx
+├── pages/              # Страницы приложения
+│   ├── LandingPage.tsx
+│   ├── DashboardPage.tsx
+│   ├── TasksPage.tsx
+│   └── ...
+├── contexts/           # React контексты
+│   ├── AuthContext.tsx
+│   └── ThemeContext.tsx
+├── stores/             # Zustand стейт менеджеры
+│   ├── appStore.ts
+│   └── pomodoroStore.ts
+├── hooks/              # Кастомные React хуки
+│   ├── useTasks.ts
+│   └── ...
+├── services/           # API сервисы
+│   ├── firebase.ts
+│   ├── userService.ts
+│   ├── taskService.ts
+│   └── ...
+├── utils/              # Утилиты
+│   ├── helpers.ts
+│   └── dateTime.ts
+├── types/              # TypeScript типы
+│   └── index.ts
+├── constants/          # Константы приложения
+│   └── index.ts
+└── lib/                # Конфигурация библиотек
+    └── firebase.ts
+```
+
+## 🔧 Конфигурация
+
+### Firebase
+
+1. **Authentication Providers**
+   - Email/Password
+   - Google Sign-in
+
+2. **Firestore Collections**
+   - `users` - Пользователи
+   - `workspaces` - Рабочие пространства
+   - `projects` - Проекты
+   - `tasks` - Задачи
+   - `pomodoroSessions` - Pomodoro сессии
+   - `userAchievements` - Достижения пользователей
+   - `gardenPlants` - Растения сада
+   - `notifications` - Уведомления
+
+3. **Storage Structure**
+   ```
+   /users/{userId}/
+   ├── avatar.jpg
+   └── attachments/
+       └── {taskId}/
+   ```
+
+### Environment Variables
+
+| Переменная | Описание | Обязательная |
+|------------|----------|--------------|
+| `VITE_FIREBASE_API_KEY` | Firebase API ключ | ✅ |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase Auth домен | ✅ |
+| `VITE_FIREBASE_PROJECT_ID` | Firebase Project ID | ✅ |
+| `VITE_FIREBASE_STORAGE_BUCKET` | Firebase Storage bucket | ✅ |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase Messaging ID | ✅ |
+| `VITE_FIREBASE_APP_ID` | Firebase App ID | ✅ |
+| `VITE_ENABLE_ANALYTICS` | Включить аналитику | ❌ |
+| `VITE_ENABLE_GARDEN` | Включить виртуальный сад | ❌ |
+
+## 🚀 Развертывание
+
+### Firebase Hosting
+
+1. **Установка Firebase CLI**
+```bash
+npm install -g firebase-tools
+```
+
+2. **Авторизация**
+```bash
+firebase login
+```
+
+3. **Инициализация проекта**
+```bash
+firebase init
+```
+
+4. **Сборка и развертывание**
+```bash
+npm run build
+firebase deploy
+```
+
+### Альтернативные платформы
+
+- **Vercel**: Подключите GitHub репозиторий
+- **Netlify**: Drag & drop папки `dist`
+- **GitHub Pages**: Используйте GitHub Actions
+
+## 🧪 Тестирование
+
+```bash
+# Запуск тестов
+npm run test
+
+# Покрытие тестами
+npm run test:coverage
+
+# E2E тесты
+npm run test:e2e
+```
+
+## 📊 Производительность
+
+- **Lighthouse Score**: 90+
+- **Bundle Size**: ~500KB gzipped
+- **First Contentful Paint**: <1.5s
+- **Time to Interactive**: <3s
+
+## 🔐 Безопасность
+
+- HTTPS Only
+- Firebase Security Rules
+- Input Sanitization
+- XSS Protection
+- CSRF Protection
+
+## 🤝 Вклад в проект
+
+1. Fork проекта
+2. Создайте feature ветку (`git checkout -b feature/amazing-feature`)
+3. Commit изменения (`git commit -m 'Add amazing feature'`)
+4. Push в ветку (`git push origin feature/amazing-feature`)
+5. Создайте Pull Request
+
+## 📝 Лицензия
+
+Этот проект лицензирован под MIT License - см. файл [LICENSE](LICENSE) для деталей.
+
+## 🆘 Поддержка
+
+- 📧 Email: support@progressquest.com
+- 💬 Discord: [ProgressQuest Community](https://discord.gg/progressquest)
+- 📖 Wiki: [Project Wiki](https://github.com/your-username/progressquest-universal/wiki)
+
+## 🗺 Roadmap
+
+### v1.1.0
+- [ ] Мобильное приложение (React Native)
+- [ ] Командная работа в реальном времени
+- [ ] Интеграции с внешними сервисами
+
+### v1.2.0
+- [ ] AI-помощник для планирования
+- [ ] Расширенная аналитика
+- [ ] Темплейты проектов
+
+### v2.0.0
+- [ ] Белые лейблы
+- [ ] Enterprise функции
+- [ ] API для интеграций
+
+## 🙏 Благодарности
+
+- [React](https://reactjs.org/) - UI библиотека
+- [Firebase](https://firebase.google.com/) - Backend платформа
+- [Tailwind CSS](https://tailwindcss.com/) - CSS фреймворк
+- [Radix UI](https://www.radix-ui.com/) - UI примитивы
+
+
+--- tailwind.config.js ---
+
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: ["class"],
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
+  theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        chart: {
+          "1": "hsl(var(--chart-1))",
+          "2": "hsl(var(--chart-2))",
+          "3": "hsl(var(--chart-3))",
+          "4": "hsl(var(--chart-4))",
+          "5": "hsl(var(--chart-5))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: [
+          "Inter",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "Oxygen",
+          "Ubuntu",
+          "Cantarell",
+          "sans-serif",
+        ],
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fade-in 0.3s ease-out",
+        "slide-in": "slide-in 0.3s ease-out",
+        "slide-up": "slide-up 0.3s ease-out",
+        "bounce-subtle": "bounce-subtle 2s infinite",
+        "pulse-subtle": "pulse-subtle 2s infinite",
+        "rotate-slow": "rotate-slow 3s linear infinite",
+        "shimmer": "shimmer 2s linear infinite",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "fade-in": {
+          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "slide-in": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(0)" },
+        },
+        "slide-up": {
+          "0%": { transform: "translateY(100%)" },
+          "100%": { transform: "translateY(0)" },
+        },
+        "bounce-subtle": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-5px)" },
+        },
+        "pulse-subtle": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.8" },
+        },
+        "rotate-slow": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+        "shimmer": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '120': '30rem',
+      },
+      maxWidth: {
+        '8xl': '88rem',
+        '9xl': '96rem',
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
+      boxShadow: {
+        'inner-lg': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.1)',
+        'glow': '0 0 20px rgba(139, 92, 246, 0.3)',
+        'glow-lg': '0 0 30px rgba(139, 92, 246, 0.4)',
+      },
+      screens: {
+        'xs': '475px',
+        '3xl': '1920px',
+      },
+      gridTemplateColumns: {
+        'auto-fit': 'repeat(auto-fit, minmax(0, 1fr))',
+        'auto-fill': 'repeat(auto-fill, minmax(0, 1fr))',
+      },
+      aspectRatio: {
+        '4/3': '4 / 3',
+        '3/2': '3 / 2',
+        '2/3': '2 / 3',
+        '9/16': '9 / 16',
+      },
+    },
+  },
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
+    require("@tailwindcss/forms"),
+    require("@tailwindcss/aspect-ratio"),
+    require("@tailwindcss/container-queries"),
+  ],
+}
+
+
+--- tsconfig.json ---
+
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    /* Path mapping */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
+
+
+--- tsconfig.node.json ---
+
+{
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.ts"]
+}
+
+
+--- vite.config.ts ---
+
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+import path from 'path'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/functions'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
+        },
+      },
+    },
+  },
+  server: {
+    port: 3000,
+    open: true,
+  },
+  preview: {
+    port: 3000,
+  },
+})
+
+
+--- src/App.tsx ---
+
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { Toaster } from 'sonner'
+import { AuthProvider } from '@/contexts/AuthContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { Layout } from '@/components/Layout'
+
+import { AuthRedirector } from '@/components/AuthRedirector'
+import { LandingPage } from '@/pages/LandingPage'
+import { LoginPage } from '@/pages/LoginPage'
+import { RegisterPage } from '@/pages/RegisterPage'
+import { DashboardPage } from '@/pages/DashboardPage'
+import { TasksPage } from '@/pages/TasksPage'
+import { ProjectsPage } from '@/pages/ProjectsPage'
+import { GardenPage } from '@/pages/GardenPage'
+import { AnalyticsPage } from '@/pages/AnalyticsPage'
+import { SettingsPage } from '@/pages/SettingsPage'
+import { ProfilePage } from '@/pages/ProfilePage'
+import { NotFoundPage } from '@/pages/NotFoundPage'
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: (failureCount, error: any) => {
+        if (error?.status === 404) return false
+        return failureCount < 3
+      },
+    },
+  },
+})
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <AuthProvider>
+          <Router>
+            <div className="min-h-screen bg-background text-foreground">
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<AuthRedirector />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                
+                {/* Protected routes */}
+                <Route
+                  path="/app/*"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Routes>
+                          <Route index element={<DashboardPage />} />
+                          <Route path="tasks" element={<TasksPage />} />
+                          <Route path="projects" element={<ProjectsPage />} />
+                          <Route path="garden" element={<GardenPage />} />
+                          <Route path="analytics" element={<AnalyticsPage />} />
+                          <Route path="settings" element={<SettingsPage />} />
+                          <Route path="profile" element={<ProfilePage />} />
+                        </Routes>
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                
+                {/* 404 route */}
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+              
+              <Toaster 
+                position="top-right"
+                toastOptions={{
+                  className: 'bg-background border-border text-foreground',
+                }}
+              />
+            </div>
+          </Router>
+        </AuthProvider>
+      </ThemeProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  )
+}
+
+export default App
+
+
+--- src/index.css ---
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 271.5 81.3% 55.9%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 271.5 81.3% 55.9%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 271.5 81.3% 55.9%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 271.5 81.3% 55.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-muted;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s infinite;
+}
+
+/* Glassmorphism effect */
+.glass {
+  @apply bg-white/10 backdrop-blur-lg border border-white/20;
+}
+
+.glass-dark {
+  @apply bg-black/10 backdrop-blur-lg border border-black/20;
+}
+
+/* Task card hover effects */
+.task-card {
+  @apply transition-all duration-200 hover:shadow-md hover:scale-[1.02];
+}
+
+/* Sidebar transition */
+.sidebar-transition {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* Focus ring for accessibility */
+.focus-ring {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+}
+
+/* Loading spinner */
+.spinner {
+  @apply animate-spin rounded-full border-2 border-current border-t-transparent;
+}
+
+/* Custom button variants */
+.btn-gradient {
+  @apply bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground;
+}
+
+/* Calendar custom styles */
+.rdp {
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: hsl(var(--primary));
+  --rdp-background-color: hsl(var(--muted));
+}
+
+/* Drag and drop styles */
+.dragging {
+  @apply opacity-50 transform rotate-3;
+}
+
+.drop-zone {
+  @apply bg-primary/10 border-2 border-dashed border-primary;
+}
+
+/* Pomodoro timer styles */
+.timer-circle {
+  transform-origin: center;
+  transform: rotate(-90deg);
+}
+
+/* Achievement badge styles */
+.achievement-badge {
+  @apply bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-lg;
+}
+
+/* Garden plant animations */
+.plant-grow {
+  animation: plantGrow 2s ease-out;
+}
+
+@keyframes plantGrow {
+  0% {
+    transform: scale(0) rotate(-10deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Team collaboration indicators */
+.collaboration-indicator {
+  animation: pulse 2s infinite;
+}
+
+/* Stats dashboard charts */
+.chart-container {
+  @apply p-4 bg-card rounded-lg border shadow-sm;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .mobile-optimized {
+    @apply text-sm p-2;
+  }
+  
+  .mobile-sidebar {
+    @apply fixed inset-0 z-50 bg-background/80 backdrop-blur-sm;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-optimize {
+    @apply text-black bg-white;
+  }
+}
+
+
+--- src/main.tsx ---
+
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { initializeApp } from './services/firebase'
+import App from './App'
+import './index.css'
+
+// Initialize Firebase
+initializeApp()
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+)
+
+
+--- src/vite-env.d.ts ---
+
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_FIREBASE_API_KEY: string
+  readonly VITE_FIREBASE_AUTH_DOMAIN: string
+  readonly VITE_FIREBASE_PROJECT_ID: string
+  readonly VITE_FIREBASE_STORAGE_BUCKET: string
+  readonly VITE_FIREBASE_MESSAGING_SENDER_ID: string
+  readonly VITE_FIREBASE_APP_ID: string
+  readonly VITE_APP_NAME: string
+  readonly VITE_APP_VERSION: string
+  readonly VITE_APP_ENVIRONMENT: string
+  readonly VITE_API_BASE_URL: string
+  readonly VITE_API_TIMEOUT: string
+  readonly VITE_GOOGLE_ANALYTICS_ID: string
+  readonly VITE_ENABLE_ANALYTICS: string
+  readonly VITE_ENABLE_NOTIFICATIONS: string
+  readonly VITE_ENABLE_GARDEN: string
+  readonly VITE_ENABLE_COLLABORATION: string
+  readonly VITE_SUPPORT_EMAIL: string
+  readonly VITE_FEEDBACK_URL: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}
+
+
+--- src/components/AuthRedirector.tsx ---
+
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { LandingPage } from '@/pages/LandingPage';
+
+export function AuthRedirector() {
+  const { isAuthenticated, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading) {
+      if (isAuthenticated) {
+        navigate('/app');
+      } else {
+        // Stay on LandingPage if not authenticated
+      }
+    }
+  }, [isAuthenticated, loading, navigate]);
+
+  if (loading) {
+    return <div>Loading...</div>; // Or a spinner
+  }
+
+  return <LandingPage />;
+}
+
+
+--- src/components/DemoBanner.tsx ---
+
+import { shouldUseMockServices } from '@/lib/mockFirebase'
+
+export const DemoBanner = () => {
+  if (!shouldUseMockServices()) {
+    return null
+  }
+
+  return (
+    <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
+      <div className="flex items-center">
+        <div className="text-yellow-500 mr-3">
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-medium">
+            🔥 Демо режим активен
+          </p>
+          <p className="text-xs mt-1">
+            Настройте Firebase в файле .env.local для полной функциональности. 
+            Сейчас приложение работает в демо-режиме с ограниченными возможностями.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+--- src/components/Layout.tsx ---
+
+import React from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContext'
+import { useAppStore } from '@/stores/appStore'
+import { usePomodoroStore } from '@/stores/pomodoroStore'
+import { cn } from '@/utils/helpers'
+import { ROUTES } from '@/constants'
+import { DemoBanner } from './DemoBanner'
+
+interface LayoutProps {
+  children: React.ReactNode
+}
+
+const navigation = [
+  { name: 'Панель', href: ROUTES.DASHBOARD, icon: '📊' },
+  { name: 'Задачи', href: ROUTES.TASKS, icon: '✅' },
+  { name: 'Проекты', href: ROUTES.PROJECTS, icon: '📁' },
+  { name: 'Сад', href: ROUTES.GARDEN, icon: '🌱' },
+  { name: 'Аналитика', href: ROUTES.ANALYTICS, icon: '📈' },
+  { name: 'Настройки', href: ROUTES.SETTINGS, icon: '⚙️' },
+]
+
+export const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { currentUser, logout } = useAuth()
+  const { sidebarOpen, setSidebarOpen } = useAppStore()
+  const { status, timeRemaining, sessionType, pauseTimer, resumeTimer, stopTimer } = usePomodoroStore()
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      navigate(ROUTES.HOME)
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <div className={cn(
+        'fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out',
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      )}>
+        <div className="flex flex-col h-full">
+          {/* Logo */}
+          <div className="flex items-center justify-between h-16 px-6 border-b">
+            <h1 className="text-xl font-bold text-gray-900">ProgressQuest</h1>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 lg:hidden"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Pomodoro Timer */}
+          {status !== 'idle' && (
+            <div className="px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-purple-50">
+              <div className="text-center">
+                <div className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                  {sessionType === 'work' ? 'Работа' : sessionType === 'short_break' ? 'Короткий перерыв' : 'Длинный перерыв'}
+                </div>
+                <div className="text-2xl font-bold text-gray-900 mb-2">
+                  {formatTime(timeRemaining)}
+                </div>
+                <div className="flex justify-center space-x-2">
+                  {status === 'running' ? (
+                    <button
+                      onClick={pauseTimer}
+                      className="px-3 py-1 text-xs bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                    >
+                      Пауза
+                    </button>
+                  ) : (
+                    <button
+                      onClick={resumeTimer}
+                      className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
+                    >
+                      Продолжить
+                    </button>
+                  )}
+                  <button
+                    onClick={stopTimer}
+                    className="px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
+                  >
+                    Стоп
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <nav className="flex-1 px-6 py-4 space-y-2">
+            {navigation.map((item) => {
+              const isActive = location.pathname === item.href ||
+                (item.href !== ROUTES.DASHBOARD && location.pathname.startsWith(item.href))
+              
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={cn(
+                    'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                    isActive
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  )}
+                >
+                  <span className="mr-3 text-lg">{item.icon}</span>
+                  {item.name}
+                </Link>
+              )
+            })}
+          </nav>
+
+          {/* User Menu */}
+          <div className="px-6 py-4 border-t">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                {currentUser?.photoURL ? (
+                  <img
+                    className="h-8 w-8 rounded-full"
+                    src={currentUser.photoURL}
+                    alt={currentUser.displayName || ''}
+                  />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
+                    <span className="text-sm text-gray-600">👤</span>
+                  </div>
+                )}
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-sm font-medium text-gray-900">
+                  {currentUser?.displayName || 'Пользователь'}
+                </p>
+                <div className="flex space-x-2 mt-1">
+                  <Link
+                    to={ROUTES.PROFILE}
+                    className="text-xs text-blue-600 hover:text-blue-800"
+                  >
+                    Профиль
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="text-xs text-red-600 hover:text-red-800"
+                  >
+                    Выйти
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className={cn(
+        'transition-all duration-200 ease-in-out',
+        sidebarOpen ? 'lg:pl-64' : ''
+      )}>
+        {/* Top bar */}
+        <div className="bg-white shadow-sm border-b h-16 flex items-center justify-between px-6">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+          >
+            ☰
+          </button>
+          
+          <div className="flex items-center space-x-4">
+            {/* Quick actions */}
+            <Link
+              to={ROUTES.TASKS}
+              className="px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              + Новая задача
+            </Link>
+          </div>
+        </div>
+
+        {/* Page content */}
+        <main className="flex-1">
+          <div className="p-6">
+            <DemoBanner />
+            {children}
+          </div>
+        </main>
+      </div>
+
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+
+--- src/components/ProtectedRoute.tsx ---
+
+import React from 'react'
+import { Navigate, useLocation } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContext'
+
+interface ProtectedRouteProps {
+  children: React.ReactNode
+}
+
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const { currentUser, loading } = useAuth()
+  const location = useLocation()
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  if (!currentUser) {
+    // Redirect them to the /login page, but save the attempted location
+    return <Navigate to="/login" state={{ from: location }} replace />
+  }
+
+  return <>{children}</>
+}
+
+
+
+--- src/constants/index.ts ---
+
+// Application constants
+export const APP_NAME = 'ProgressQuest Universal'
+export const APP_VERSION = '1.0.0'
+
+// Routes
+export const ROUTES = {
+  HOME: '/',
+  LOGIN: '/login',
+  REGISTER: '/register',
+  DASHBOARD: '/app',
+  TASKS: '/app/tasks',
+  PROJECTS: '/app/projects',
+  GARDEN: '/app/garden',
+  ANALYTICS: '/app/analytics',
+  SETTINGS: '/app/settings',
+  PROFILE: '/app/profile',
+} as const
+
+// Local Storage Keys
+export const STORAGE_KEYS = {
+  THEME: 'theme',
+  USER_PREFERENCES: 'user_preferences',
+  POMODORO_SETTINGS: 'pomodoro_settings',
+  LAST_WORKSPACE: 'last_workspace',
+} as const
+
+// API Configuration
+export const API_CONFIG = {
+  TIMEOUT: 30000,
+  RETRY_ATTEMPTS: 3,
+  RETRY_DELAY: 1000,
+} as const
+
+// Pagination
+export const PAGINATION = {
+  DEFAULT_PAGE_SIZE: 20,
+  MAX_PAGE_SIZE: 100,
+} as const
+
+// Validation
+export const VALIDATION = {
+  MIN_PASSWORD_LENGTH: 6,
+  MAX_TASK_TITLE_LENGTH: 100,
+  MAX_TASK_DESCRIPTION_LENGTH: 1000,
+  MAX_PROJECT_NAME_LENGTH: 50,
+  MAX_WORKSPACE_NAME_LENGTH: 50,
+} as const
+
+// Pomodoro Timer
+export const POMODORO = {
+  DEFAULT_WORK_DURATION: 25 * 60, // 25 minutes in seconds
+  DEFAULT_SHORT_BREAK: 5 * 60,   // 5 minutes in seconds
+  DEFAULT_LONG_BREAK: 15 * 60,   // 15 minutes in seconds
+  DEFAULT_LONG_BREAK_INTERVAL: 4, // Every 4 pomodoros
+} as const
+
+// XP and Levels
+export const GAMIFICATION = {
+  XP_PER_TASK: 10,
+  XP_PER_POMODORO: 5,
+  XP_BONUS_STREAK: 5,
+  BASE_XP_FOR_LEVEL: 100,
+  XP_MULTIPLIER: 1.5,
+} as const
+
+// Theme Colors
+export const THEME_COLORS = {
+  LIGHT: 'light',
+  DARK: 'dark',
+  SYSTEM: 'system',
+} as const
+
+// Task Status Colors
+export const STATUS_COLORS = {
+  todo: 'bg-gray-100 text-gray-800',
+  in_progress: 'bg-blue-100 text-blue-800',
+  review: 'bg-purple-100 text-purple-800',
+  done: 'bg-green-100 text-green-800',
+  cancelled: 'bg-red-100 text-red-800',
+} as const
+
+// Priority Colors
+export const PRIORITY_COLORS = {
+  low: 'bg-green-100 text-green-800',
+  medium: 'bg-yellow-100 text-yellow-800',
+  high: 'bg-orange-100 text-orange-800',
+  urgent: 'bg-red-100 text-red-800',
+} as const
+
+// Garden Plant Categories
+export const PLANT_CATEGORIES = {
+  FLOWERS: 'flowers',
+  TREES: 'trees',
+  HERBS: 'herbs',
+  MUSHROOMS: 'mushrooms',
+} as const
+
+// Achievement Categories
+export const ACHIEVEMENT_CATEGORIES = {
+  TASKS: 'tasks',
+  POMODORO: 'pomodoro',
+  STREAK: 'streak',
+  SOCIAL: 'social',
+  GARDEN: 'garden',
+} as const
+
+// Notification Types
+export const NOTIFICATION_TYPES = {
+  TASK_REMINDER: 'task_reminder',
+  POMODORO_BREAK: 'pomodoro_break',
+  ACHIEVEMENT: 'achievement',
+  INVITATION: 'invitation',
+  MENTION: 'mention',
+  SYSTEM: 'system',
+} as const
+
+// Error Messages
+export const ERROR_MESSAGES = {
+  NETWORK_ERROR: 'Ошибка сети. Проверьте подключение к интернету.',
+  UNAUTHORIZED: 'Недостаточно прав доступа.',
+  NOT_FOUND: 'Запрашиваемый ресурс не найден.',
+  VALIDATION_ERROR: 'Ошибка валидации данных.',
+  UNKNOWN_ERROR: 'Произошла неизвестная ошибка.',
+} as const
+
+// Success Messages
+export const SUCCESS_MESSAGES = {
+  TASK_CREATED: 'Задача успешно создана',
+  TASK_UPDATED: 'Задача обновлена',
+  TASK_DELETED: 'Задача удалена',
+  PROJECT_CREATED: 'Проект создан',
+  PROJECT_UPDATED: 'Проект обновлен',
+  SETTINGS_SAVED: 'Настройки сохранены',
+  PROFILE_UPDATED: 'Профиль обновлен',
+} as const
+
+
+--- src/contexts/AuthContext.tsx ---
+
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import {
+  User,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  signInWithPopup,
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+} from 'firebase/auth'
+import { auth, googleProvider } from '@/lib/firebase' // Import googleProvider
+import { toast } from 'sonner'
+
+interface AuthContextType {
+  currentUser: User | null
+  login: (email: string, password: string) => Promise<void>
+  register: (email: string, password: string, displayName: string) => Promise<void>
+  logout: () => Promise<void>
+  loginWithGoogle: () => Promise<void>
+  resetPassword: (email: string) => Promise<void>
+  updateUserProfile: (displayName: string) => Promise<void>
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>
+  loading: boolean
+  isAuthenticated: boolean
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+export function useAuth() {
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+  return context
+}
+
+interface AuthProviderProps {
+  children: ReactNode
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  const login = async (email: string, password: string) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password)
+      toast.success('Успешный вход в систему!')
+    } catch (error: any) {
+      console.error('Login error:', error)
+      switch (error.code) {
+        case 'auth/user-not-found':
+          toast.error('Пользователь с таким email не найден')
+          break
+        case 'auth/wrong-password':
+          toast.error('Неверный пароль')
+          break
+        case 'auth/invalid-email':
+          toast.error('Неверный формат email')
+          break
+        case 'auth/too-many-requests':
+          toast.error('Слишком много неудачных попыток. Попробуйте позже')
+          break
+        default:
+          toast.error('Ошибка входа: ' + error.message)
+      }
+      throw error
+    }
+  }
+
+  const register = async (email: string, password: string, displayName: string) => {
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password)
+      await updateProfile(result.user, { displayName })
+      await sendEmailVerification(result.user)
+      toast.success('Регистрация успешна! Проверьте email для подтверждения.')
+    } catch (error: any) {
+      console.error('Registration error:', error)
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          toast.error('Пользователь с таким email уже существует')
+          break
+        case 'auth/weak-password':
+          toast.error('Пароль должен содержать минимум 6 символов')
+          break
+        case 'auth/invalid-email':
+          toast.error('Неверный формат email')
+          break
+        default:
+          toast.error('Ошибка регистрации: ' + error.message)
+      }
+      throw error
+    }
+  }
+
+  const logout = async () => {
+    try {
+      await signOut(auth)
+      toast.success('Вы успешно вышли из системы')
+    } catch (error: any) {
+      console.error('Logout error:', error)
+      toast.error('Ошибка выхода из системы')
+      throw error
+    }
+  }
+
+  const loginWithGoogle = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider) // Use imported googleProvider
+      toast.success('Успешный вход через Google!')
+    } catch (error: any) {
+      console.error('Google login error:', error)
+      if (error.code !== 'auth/popup-closed-by-user') {
+        toast.error('Ошибка входа через Google: ' + error.message)
+      }
+      throw error
+    }
+  }
+
+  const resetPassword = async (email: string) => {
+    try {
+      await sendPasswordResetEmail(auth, email)
+      toast.success('Инструкции по сбросу пароля отправлены на email')
+    } catch (error: any) {
+      console.error('Password reset error:', error)
+      switch (error.code) {
+        case 'auth/user-not-found':
+          toast.error('Пользователь с таким email не найден')
+          break
+        case 'auth/invalid-email':
+          toast.error('Неверный формат email')
+          break
+        default:
+          toast.error('Ошибка сброса пароля: ' + error.message)
+      }
+      throw error
+    }
+  }
+
+  const updateUserProfile = async (displayName: string) => {
+    try {
+      if (currentUser) {
+        await updateProfile(currentUser, { displayName })
+        toast.success('Профиль обновлен')
+      }
+    } catch (error: any) {
+      console.error('Profile update error:', error)
+      toast.error('Ошибка обновления профиля: ' + error.message)
+      throw error
+    }
+  }
+
+  const changePassword = async (currentPassword: string, newPassword: string) => {
+    try {
+      if (currentUser && currentUser.email) {
+        const credential = EmailAuthProvider.credential(currentUser.email, currentPassword)
+        await reauthenticateWithCredential(currentUser, credential)
+        await updatePassword(currentUser, newPassword)
+        toast.success('Пароль успешно изменен')
+      }
+    } catch (error: any) {
+      console.error('Password change error:', error)
+      switch (error.code) {
+        case 'auth/wrong-password':
+          toast.error('Неверный текущий пароль')
+          break
+        case 'auth/weak-password':
+          toast.error('Новый пароль должен содержать минимум 6 символов')
+          break
+        default:
+          toast.error('Ошибка изменения пароля: ' + error.message)
+      }
+      throw error
+    }
+  }
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user)
+      setLoading(false)
+    })
+
+    return unsubscribe
+  }, [])
+
+  const value: AuthContextType = {
+    currentUser,
+    login,
+    register,
+    logout,
+    loginWithGoogle,
+    resetPassword,
+    updateUserProfile,
+    changePassword,
+    loading,
+    isAuthenticated: !!currentUser,
+  }
+
+  return (
+    <AuthContext.Provider value={value}>
+      {!loading && children}
+    </AuthContext.Provider>
+  )
+}
+
+
+
+--- src/contexts/ThemeContext.tsx ---
+
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+
+type Theme = 'light' | 'dark' | 'system'
+
+interface ThemeContextType {
+  theme: Theme
+  setTheme: (theme: Theme) => void
+  resolvedTheme: 'light' | 'dark'
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+
+export function useTheme() {
+  const context = useContext(ThemeContext)
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider')
+  }
+  return context
+}
+
+interface ThemeProviderProps {
+  children: ReactNode
+  defaultTheme?: Theme
+}
+
+export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProviderProps) {
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('theme') as Theme) || defaultTheme
+    }
+    return defaultTheme
+  })
+
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      if (theme === 'system') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      }
+      return theme === 'dark' ? 'dark' : 'light'
+    }
+    return 'light'
+  })
+
+  useEffect(() => {
+    const root = window.document.documentElement
+
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      setResolvedTheme(systemTheme)
+      root.classList.remove('light', 'dark')
+      root.classList.add(systemTheme)
+    } else {
+      setResolvedTheme(theme === 'dark' ? 'dark' : 'light')
+      root.classList.remove('light', 'dark')
+      root.classList.add(theme)
+    }
+  }, [theme])
+
+  useEffect(() => {
+    localStorage.setItem('theme', theme)
+  }, [theme])
+
+  useEffect(() => {
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      
+      const handleChange = (e: MediaQueryListEvent) => {
+        const systemTheme = e.matches ? 'dark' : 'light'
+        setResolvedTheme(systemTheme)
+        const root = window.document.documentElement
+        root.classList.remove('light', 'dark')
+        root.classList.add(systemTheme)
+      }
+
+      mediaQuery.addEventListener('change', handleChange)
+      return () => mediaQuery.removeEventListener('change', handleChange)
+    }
+  }, [theme])
+
+  const value: ThemeContextType = {
+    theme,
+    setTheme,
+    resolvedTheme,
+  }
+
+  return (
+    <ThemeContext.Provider value={value}>
+      {children}
+    </ThemeContext.Provider>
+  )
+}
+
+
+--- src/hooks/useTasks.ts ---
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { TaskService, TaskFilters, TaskCreateData } from '@/services/taskService'
+import { UserService } from '@/services/userService'
+import { Task, TaskStatus } from '@/types'
+import { toast } from 'sonner'
+import { SUCCESS_MESSAGES, GAMIFICATION } from '@/constants'
+
+// Query keys
+export const TASK_KEYS = {
+  all: ['tasks'] as const,
+  lists: () => [...TASK_KEYS.all, 'list'] as const,
+  list: (filters: TaskFilters) => [...TASK_KEYS.lists(), filters] as const,
+  details: () => [...TASK_KEYS.all, 'detail'] as const,
+  detail: (id: string) => [...TASK_KEYS.details(), id] as const,
+  stats: (userId: string) => [...TASK_KEYS.all, 'stats', userId] as const,
+}
+
+// Get tasks with filters
+export function useTasks(filters: TaskFilters = {}, pageSize: number = 20) {
+  return useQuery({
+    queryKey: TASK_KEYS.list(filters),
+    queryFn: () => TaskService.getTasks(filters, pageSize),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+}
+
+// Get single task
+export function useTask(taskId: string) {
+  return useQuery({
+    queryKey: TASK_KEYS.detail(taskId),
+    queryFn: () => TaskService.getTask(taskId),
+    enabled: !!taskId,
+  })
+}
+
+// Get task statistics
+export function useTaskStats(userId: string, workspaceId?: string) {
+  return useQuery({
+    queryKey: TASK_KEYS.stats(userId),
+    queryFn: () => TaskService.getTasksStats(userId, workspaceId),
+    enabled: !!userId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  })
+}
+
+// Create task mutation
+export function useCreateTask() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ userId, taskData }: { userId: string; taskData: TaskCreateData }) =>
+      TaskService.createTask(userId, taskData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: TASK_KEYS.lists() })
+      queryClient.invalidateQueries({ queryKey: TASK_KEYS.all })
+      toast.success(SUCCESS_MESSAGES.TASK_CREATED)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    },
+  })
+}
+
+// Update task mutation
+export function useUpdateTask() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ taskId, updates }: { taskId: string; updates: Partial<Task> }) =>
+      TaskService.updateTask(taskId, updates),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: TASK_KEYS.detail(variables.taskId) })
+      queryClient.invalidateQueries({ queryKey: TASK_KEYS.lists() })
+      toast.success(SUCCESS_MESSAGES.TASK_UPDATED)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    },
+  })
+}
+
+// Update task status with XP reward
+export function useUpdateTaskStatus() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ 
+      taskId, 
+      status, 
+      userId 
+    }: { 
+      taskId: string; 
+      status: TaskStatus; 
+      userId: string 
+    }) => {
+      await TaskService.updateTaskStatus(taskId, status)
+      
+      // Award XP for completing tasks
+      if (status === 'done') {
+        await UserService.addXP(userId, GAMIFICATION.XP_PER_TASK)
+        await UserService.incrementTaskCount(userId)
+      }
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: TASK_KEYS.detail(variables.taskId) })
+      queryClient.invalidateQueries({ queryKey: TASK_KEYS.lists() })
+      queryClient.invalidateQueries({ queryKey: TASK_KEYS.stats(variables.userId) })
+      
+      if (variables.status === 'done') {
+        toast.success('Задача выполнена! +' + GAMIFICATION.XP_PER_TASK + ' XP')
+      } else {
+        toast.success(SUCCESS_MESSAGES.TASK_UPDATED)
+      }
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    },
+  })
+}
+
+// Delete task mutation
+export function useDeleteTask() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: TaskService.deleteTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: TASK_KEYS.lists() })
+      toast.success(SUCCESS_MESSAGES.TASK_DELETED)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    },
+  })
+}
+
+// Archive task mutation
+export function useArchiveTask() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ taskId, isArchived }: { taskId: string; isArchived: boolean }) =>
+      TaskService.archiveTask(taskId, isArchived),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: TASK_KEYS.detail(variables.taskId) })
+      queryClient.invalidateQueries({ queryKey: TASK_KEYS.lists() })
+      toast.success(variables.isArchived ? 'Задача архивирована' : 'Задача восстановлена')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    },
+  })
+}
+
+// Add comment mutation
+export function useAddComment() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ 
+      taskId, 
+      userId, 
+      content 
+    }: { 
+      taskId: string; 
+      userId: string; 
+      content: string 
+    }) => TaskService.addComment(taskId, userId, content),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: TASK_KEYS.detail(variables.taskId) })
+      toast.success('Комментарий добавлен')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    },
+  })
+}
+
+// Increment pomodoro count mutation
+export function useIncrementPomodoro() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ 
+      taskId, 
+      userId 
+    }: { 
+      taskId: string; 
+      userId: string 
+    }) => {
+      return Promise.all([
+        TaskService.incrementPomodoroCount(taskId),
+        UserService.addXP(userId, GAMIFICATION.XP_PER_POMODORO),
+        UserService.incrementPomodoroCount(userId)
+      ])
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: TASK_KEYS.detail(variables.taskId) })
+      queryClient.invalidateQueries({ queryKey: TASK_KEYS.lists() })
+      toast.success('Pomodoro завершён! +' + GAMIFICATION.XP_PER_POMODORO + ' XP')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    },
+  })
+}
+
+// Bulk update tasks mutation
+export function useBulkUpdateTasks() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: TaskService.bulkUpdateTasks,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: TASK_KEYS.lists() })
+      toast.success('Задачи обновлены')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message)
+    },
+  })
+}
+
+
+--- src/lib/firebase.ts ---
+
+// src/lib/firebase.ts
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getFunctions } from "firebase/functions";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCYXSYFEKHWbfQiVypZoWQK05hamae_Q0g",
+  authDomain: "progress-quest-universal.firebaseapp.com",
+  projectId: "progress-quest-universal",
+  storageBucket: "progress-quest-universal.firebasestorage.app",
+  messagingSenderId: "1039559255344",
+  appId: "1:1039559255344:web:dd296d7ea524be2f8554f5",
+  measurementId: "G-JLFRTXVRXR"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const functions = getFunctions(app);
+const googleProvider = new GoogleAuthProvider();
+
+export { app, auth, db, functions, googleProvider };
+
+
+--- src/lib/mockFirebase.ts ---
+
+// Mock Firebase services for development when no real Firebase is configured
+
+export const mockAuth = {
+  currentUser: null,
+  onAuthStateChanged: (callback: (user: any) => void) => {
+    // Simulate no user logged in
+    setTimeout(() => callback(null), 100);
+    return () => {}; // Unsubscribe function
+  },
+  signInWithEmailAndPassword: async () => {
+    throw new Error('Demo mode: Please configure Firebase to enable authentication');
+  },
+  createUserWithEmailAndPassword: async () => {
+    throw new Error('Demo mode: Please configure Firebase to enable authentication');
+  },
+  signOut: async () => {
+    throw new Error('Demo mode: Please configure Firebase to enable authentication');
+  },
+  signInWithPopup: async () => {
+    throw new Error('Demo mode: Please configure Firebase to enable authentication');
+  },
+  sendPasswordResetEmail: async () => {
+    throw new Error('Demo mode: Please configure Firebase to enable authentication');
+  },
+  updateProfile: async () => {
+    throw new Error('Demo mode: Please configure Firebase to enable authentication');
+  },
+  sendEmailVerification: async () => {
+    throw new Error('Demo mode: Please configure Firebase to enable authentication');
+  },
+  updatePassword: async () => {
+    throw new Error('Demo mode: Please configure Firebase to enable authentication');
+  },
+  reauthenticateWithCredential: async () => {
+    throw new Error('Demo mode: Please configure Firebase to enable authentication');
+  }
+};
+
+export const mockDb = {
+  collection: () => ({
+    doc: () => ({
+      set: async () => {
+        throw new Error('Demo mode: Please configure Firebase to enable database operations');
+      },
+      get: async () => {
+        throw new Error('Demo mode: Please configure Firebase to enable database operations');
+      },
+      update: async () => {
+        throw new Error('Demo mode: Please configure Firebase to enable database operations');
+      },
+      delete: async () => {
+        throw new Error('Demo mode: Please configure Firebase to enable database operations');
+      }
+    }),
+    add: async () => {
+      throw new Error('Demo mode: Please configure Firebase to enable database operations');
+    },
+    get: async () => {
+      throw new Error('Demo mode: Please configure Firebase to enable database operations');
+    }
+  }),
+  doc: () => ({
+    set: async () => {
+      throw new Error('Demo mode: Please configure Firebase to enable database operations');
+    },
+    get: async () => {
+      throw new Error('Demo mode: Please configure Firebase to enable database operations');
+    },
+    update: async () => {
+      throw new Error('Demo mode: Please configure Firebase to enable database operations');
+    },
+    delete: async () => {
+      throw new Error('Demo mode: Please configure Firebase to enable database operations');
+    }
+  })
+};
+
+// Check if we should use mock services
+export const shouldUseMockServices = () => {
+  const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+  return !apiKey || apiKey === 'demo_api_key';
+};
+
+
+--- src/pages/AnalyticsPage.tsx ---
+
+
+export const AnalyticsPage = () => {
+  return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Аналитика</h1>
+        <p className="text-gray-600">Отслеживайте свою продуктивность и прогресс</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-sm font-medium text-gray-500 mb-2">Задачи за неделю</h3>
+          <p className="text-2xl font-bold text-blue-600">0</p>
+          <p className="text-sm text-gray-500 mt-1">+0% к прошлой неделе</p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-sm font-medium text-gray-500 mb-2">Pomodoro сессии</h3>
+          <p className="text-2xl font-bold text-green-600">0</p>
+          <p className="text-sm text-gray-500 mt-1">+0% к прошлой неделе</p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-sm font-medium text-gray-500 mb-2">Продуктивность</h3>
+          <p className="text-2xl font-bold text-purple-600">0%</p>
+          <p className="text-sm text-gray-500 mt-1">+0% к прошлой неделе</p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-sm font-medium text-gray-500 mb-2">Streak дней</h3>
+          <p className="text-2xl font-bold text-orange-600">0</p>
+          <p className="text-sm text-gray-500 mt-1">Дней подряд</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold mb-4">Активность по дням</h3>
+          <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+            <p className="text-gray-500">График активности</p>
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold mb-4">Распределение по категориям</h3>
+          <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+            <p className="text-gray-500">Круговая диаграмма</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+--- src/pages/DashboardPage.tsx ---
+
+
+export const DashboardPage = () => {
+  return (
+    <div className="p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Панель управления</h1>
+        <p className="text-gray-600">Добро пожаловать в ProgressQuest Universal</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold mb-2">Всего задач</h3>
+          <p className="text-3xl font-bold text-blue-600">0</p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold mb-2">Выполнено</h3>
+          <p className="text-3xl font-bold text-green-600">0</p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold mb-2">Уровень</h3>
+          <p className="text-3xl font-bold text-purple-600">1</p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold mb-2">Опыт</h3>
+          <p className="text-3xl font-bold text-orange-600">0</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-xl font-semibold mb-4">Последние задачи</h3>
+          <p className="text-gray-500">Задач пока нет</p>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-xl font-semibold mb-4">Активность</h3>
+          <p className="text-gray-500">График активности</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+--- src/pages/GardenPage.tsx ---
+
+
+export const GardenPage = () => {
+  return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Виртуальный сад</h1>
+        <p className="text-gray-600">Выращивайте растения за выполненные задачи</p>
+      </div>
+
+      <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-8 min-h-[400px]">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🌱</div>
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">Ваш сад пуст</h3>
+          <p className="text-gray-600 mb-6">
+            Выполняйте задачи, чтобы получать семена и выращивать растения
+          </p>
+          <div className="bg-white p-4 rounded-lg shadow-sm inline-block">
+            <p className="text-sm text-gray-600">Семена: <span className="font-bold">0</span></p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-lg shadow-md text-center">
+          <div className="text-2xl mb-2">🌸</div>
+          <h4 className="font-medium">Цветы</h4>
+          <p className="text-sm text-gray-600">0 растений</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-md text-center">
+          <div className="text-2xl mb-2">🌳</div>
+          <h4 className="font-medium">Деревья</h4>
+          <p className="text-sm text-gray-600">0 растений</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-md text-center">
+          <div className="text-2xl mb-2">🌿</div>
+          <h4 className="font-medium">Травы</h4>
+          <p className="text-sm text-gray-600">0 растений</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-md text-center">
+          <div className="text-2xl mb-2">🍄</div>
+          <h4 className="font-medium">Грибы</h4>
+          <p className="text-sm text-gray-600">0 растений</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+--- src/pages/LandingPage.tsx ---
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+
+export default function LandingPage() {
+  const { loginWithGoogle } = useAuth();
+  const navigate = useNavigate();
+
+  const handleGoogleLogin = async () => {
+    try {
+      await loginWithGoogle();
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Google login failed", error);
+    }
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-12">
+      <header className="text-center mb-12">
+        <h1 className="text-5xl font-bold mb-4">ProgressQuest Universal</h1>
+        <p className="text-xl text-muted-foreground">
+          Ваша интегрированная платформа для повышения личной и командной продуктивности.
+        </p>
+      </header>
+
+      <section className="text-center mb-16">
+        <Button size="lg" onClick={handleGoogleLogin}>
+          Начать с Google
+        </Button>
+        <p className="text-sm text-muted-foreground mt-2">Присоединяйтесь и начните свой квест к продуктивности!</p>
+      </section>
+
+      <section className="grid md:grid-cols-3 gap-8 mb-16">
+        <Card>
+          <CardHeader>
+            <CardTitle>Гибкое Управление Задачами</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Поддержка различных методологий (GTD, Матрица Эйзенхауэра) для идеальной организации вашей работы.</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Продвинутый Pomodoro-таймер</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Автоматическая генерация плана сессий для максимальной концентрации и эффективности.</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Многоуровневая Геймификация</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Повышайте мотивацию через систему уровней, достижений и наград, превращая работу в увлекательный квест.</p>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mb-16">
+        <h2 className="text-3xl font-bold text-center mb-8">Ключевые Возможности</h2>
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="space-y-4">
+            <h3 className="text-2xl font-semibold">Для личного использования</h3>
+            <ul className="space-y-2">
+              <li className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-1" /><span>Управляйте задачами и временем с помощью техники Pomodoro.</span></li>
+              <li className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-1" /><span>Отслеживайте личный прогресс и достижения.</span></li>
+              <li className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-1" /><span>Создавайте собственные челленджи для дополнительной мотивации.</span></li>
+            </ul>
+          </div>
+          <div className="space-y-4">
+            <h3 className="text-2xl font-semibold">Для командной работы</h3>
+            <ul className="space-y-2">
+              <li className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-1" /><span>Прозрачное распределение и отслеживание командных задач.</span></li>
+              <li className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-1" /><span>Повышение вовлеченности через командные челленджи и статистику.</span></li>
+              <li className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-1" /><span>Гибкая настройка рабочих пространств под нужды команды.</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <footer className="text-center text-muted-foreground">
+        <p>&copy; 2025 ProgressQuest Universal. Все права защищены.</p>
+      </footer>
+    </div>
+  );
+}
+
+--- src/pages/LoginPage.tsx ---
+
+
+export const LoginPage = () => {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
+        <h2 className="text-2xl font-bold text-center mb-8">Вход в систему</h2>
+        <form className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email
+            </label>
+            <input
+              type="email"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="your@email.com"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Пароль
+            </label>
+            <input
+              type="password"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="••••••••"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Войти
+          </button>
+        </form>
+        <div className="mt-6 text-center">
+          <a href="/register" className="text-blue-600 hover:text-blue-800">
+            Нет аккаунта? Зарегистрироваться
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+--- src/pages/NotFoundPage.tsx ---
+
+import { Link } from 'react-router-dom';
+
+export const NotFoundPage = () => {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="text-9xl font-bold text-gray-300 mb-4">404</div>
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">Страница не найдена</h1>
+        <p className="text-xl text-gray-600 mb-8">
+          Извините, запрашиваемая страница не существует.
+        </p>
+        <Link 
+          to="/" 
+          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Вернуться на главную
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+
+--- src/pages/ProfilePage.tsx ---
+
+
+export const ProfilePage = () => {
+  return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Профиль</h1>
+        <p className="text-gray-600">Управляйте своим профилем и достижениями</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-lg shadow-md p-6 text-center">
+            <div className="w-24 h-24 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+              <span className="text-2xl text-gray-500">👤</span>
+            </div>
+            <h2 className="text-xl font-semibold mb-2">Пользователь</h2>
+            <p className="text-gray-600 mb-4">user@example.com</p>
+            
+            <div className="border-t pt-4">
+              <div className="text-center mb-4">
+                <div className="text-2xl font-bold text-purple-600">1</div>
+                <div className="text-sm text-gray-600">Уровень</div>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                <div className="bg-purple-600 h-2 rounded-full" style={{width: '0%'}}></div>
+              </div>
+              <div className="text-sm text-gray-600">0 / 100 XP</div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6 mt-6">
+            <h3 className="text-lg font-semibold mb-4">Статистика</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Выполнено задач:</span>
+                <span className="font-semibold">0</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Pomodoro сессий:</span>
+                <span className="font-semibold">0</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Дней подряд:</span>
+                <span className="font-semibold">0</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Проектов:</span>
+                <span className="font-semibold">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h3 className="text-xl font-semibold mb-6">Личная информация</h3>
+            <form className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Имя
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  defaultValue="Пользователь"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  defaultValue="user@example.com"
+                />
+              </div>
+              <div>
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                >
+                  Сохранить изменения
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-xl font-semibold mb-6">Достижения</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="text-2xl mb-2">🏆</div>
+                <div className="text-sm font-medium">Первые шаги</div>
+                <div className="text-xs text-gray-500">Заблокировано</div>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="text-2xl mb-2">⭐</div>
+                <div className="text-sm font-medium">Продуктивный</div>
+                <div className="text-xs text-gray-500">Заблокировано</div>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="text-2xl mb-2">🔥</div>
+                <div className="text-sm font-medium">Streak мастер</div>
+                <div className="text-xs text-gray-500">Заблокировано</div>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="text-2xl mb-2">🌱</div>
+                <div className="text-sm font-medium">Садовник</div>
+                <div className="text-xs text-gray-500">Заблокировано</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+--- src/pages/ProjectsPage.tsx ---
+
+
+export const ProjectsPage = () => {
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Проекты</h1>
+        <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+          Новый проект
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-md border-2 border-dashed border-gray-200 flex flex-col items-center justify-center min-h-[200px]">
+          <div className="text-gray-400 text-4xl mb-4">+</div>
+          <h3 className="text-lg font-medium text-gray-600 mb-2">Создать проект</h3>
+          <p className="text-gray-500 text-sm text-center">
+            Организуйте свои задачи в проекты для лучшего управления
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+--- src/pages/RegisterPage.tsx ---
+
+
+export const RegisterPage = () => {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
+        <h2 className="text-2xl font-bold text-center mb-8">Регистрация</h2>
+        <form className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Имя
+            </label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Ваше имя"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email
+            </label>
+            <input
+              type="email"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="your@email.com"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Пароль
+            </label>
+            <input
+              type="password"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="••••••••"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Подтвердите пароль
+            </label>
+            <input
+              type="password"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="••••••••"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
+          >
+            Зарегистрироваться
+          </button>
+        </form>
+        <div className="mt-6 text-center">
+          <a href="/login" className="text-blue-600 hover:text-blue-800">
+            Уже есть аккаунт? Войти
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+--- src/pages/SettingsPage.tsx ---
+
+
+export const SettingsPage = () => {
+  return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Настройки</h1>
+        <p className="text-gray-600">Персонализируйте свой опыт использования</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-lg shadow-md p-4">
+            <nav className="space-y-2">
+              <button className="w-full text-left px-4 py-2 bg-blue-50 text-blue-700 rounded-lg">
+                Общие
+              </button>
+              <button className="w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+                Уведомления
+              </button>
+              <button className="w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+                Pomodoro
+              </button>
+              <button className="w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+                Геймификация
+              </button>
+              <button className="w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+                Безопасность
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-6">Общие настройки</h2>
+            
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Тема
+                </label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option>Системная</option>
+                  <option>Светлая</option>
+                  <option>Темная</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Язык
+                </label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option>Русский</option>
+                  <option>English</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Часовой пояс
+                </label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option>UTC+3 (Москва)</option>
+                  <option>UTC+0 (GMT)</option>
+                </select>
+              </div>
+
+              <div className="pt-4">
+                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                  Сохранить изменения
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+--- src/pages/TasksPage.tsx ---
+
+
+export const TasksPage = () => {
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Задачи</h1>
+        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+          Новая задача
+        </button>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-md">
+        <div className="p-6">
+          <div className="flex space-x-4 mb-6">
+            <button className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
+              Все
+            </button>
+            <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+              К выполнению
+            </button>
+            <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+              В работе
+            </button>
+            <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+              Выполнено
+            </button>
+          </div>
+
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">Задач пока нет</p>
+            <p className="text-gray-400 mt-2">Создайте свою первую задачу, чтобы начать</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+--- src/services/firebase.ts ---
+
+import { app } from '@/lib/firebase'
+
+// Initialize Firebase app
+export function initializeApp() {
+  return app
+}
+
+// Utility function to handle Firebase errors
+export function handleFirebaseError(error: any): string {
+  switch (error.code) {
+    case 'auth/user-not-found':
+      return 'Пользователь не найден'
+    case 'auth/wrong-password':
+      return 'Неверный пароль'
+    case 'auth/email-already-in-use':
+      return 'Email уже используется'
+    case 'auth/weak-password':
+      return 'Пароль должен содержать минимум 6 символов'
+    case 'auth/invalid-email':
+      return 'Неверный формат email'
+    case 'auth/too-many-requests':
+      return 'Слишком много попыток. Попробуйте позже'
+    case 'permission-denied':
+      return 'Недостаточно прав доступа'
+    case 'not-found':
+      return 'Документ не найден'
+    case 'already-exists':
+      return 'Документ уже существует'
+    case 'resource-exhausted':
+      return 'Превышен лимит запросов'
+    case 'unavailable':
+      return 'Сервис временно недоступен'
+    default:
+      console.error('Firebase error:', error)
+      return error.message || 'Произошла неизвестная ошибка'
+  }
+}
+
+
+--- src/services/taskService.ts ---
+
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+  limit,
+  startAfter,
+  serverTimestamp,
+  writeBatch,
+} from 'firebase/firestore'
+import { db } from '@/lib/firebase'
+import { Task, TaskStatus, TaskPriority, PaginatedResponse } from '@/types'
+import { handleFirebaseError } from './firebase'
+import { generateId } from '@/utils/helpers'
+
+const TASKS_COLLECTION = 'tasks'
+
+export interface TaskFilters {
+  workspaceId?: string
+  projectId?: string
+  assigneeId?: string
+  status?: TaskStatus
+  priority?: TaskPriority
+  tags?: string[]
+  dueDate?: Date
+  isArchived?: boolean
+}
+
+export interface TaskCreateData {
+  title: string
+  description?: string
+  workspaceId: string
+  projectId?: string
+  assigneeId?: string
+  priority: TaskPriority
+  tags?: string[]
+  dueDate?: Date
+  estimatedDuration?: number
+  parentId?: string
+}
+
+export class TaskService {
+  // Create a new task
+  static async createTask(
+    userId: string,
+    taskData: TaskCreateData
+  ): Promise<string> {
+    try {
+      const taskRef = collection(db, TASKS_COLLECTION)
+      
+      const task: Omit<Task, 'id'> = {
+        title: taskData.title,
+        description: taskData.description,
+        workspaceId: taskData.workspaceId,
+        projectId: taskData.projectId,
+        assigneeId: taskData.assigneeId,
+        createdById: userId,
+        parentId: taskData.parentId,
+        status: 'todo',
+        priority: taskData.priority,
+        tags: taskData.tags || [],
+        dueDate: taskData.dueDate,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        estimatedDuration: taskData.estimatedDuration,
+        pomodoroCount: 0,
+        attachments: [],
+        comments: [],
+        dependencies: [],
+        customFields: {},
+        isArchived: false,
+      }
+
+      const docRef = await addDoc(taskRef, {
+        ...task,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+
+      return docRef.id
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Get task by ID
+  static async getTask(taskId: string): Promise<Task | null> {
+    try {
+      const taskRef = doc(db, TASKS_COLLECTION, taskId)
+      const taskSnap = await getDoc(taskRef)
+      
+      if (taskSnap.exists()) {
+        const data = taskSnap.data()
+        return {
+          id: taskSnap.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+          dueDate: data.dueDate?.toDate(),
+          completedAt: data.completedAt?.toDate(),
+        } as Task
+      }
+      
+      return null
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Get tasks with filters and pagination
+  static async getTasks(
+    filters: TaskFilters = {},
+    pageSize: number = 20,
+    lastDoc?: any
+  ): Promise<PaginatedResponse<Task>> {
+    try {
+      let q = query(collection(db, TASKS_COLLECTION))
+
+      // Apply filters
+      if (filters.workspaceId) {
+        q = query(q, where('workspaceId', '==', filters.workspaceId))
+      }
+      if (filters.projectId) {
+        q = query(q, where('projectId', '==', filters.projectId))
+      }
+      if (filters.assigneeId) {
+        q = query(q, where('assigneeId', '==', filters.assigneeId))
+      }
+      if (filters.status) {
+        q = query(q, where('status', '==', filters.status))
+      }
+      if (filters.priority) {
+        q = query(q, where('priority', '==', filters.priority))
+      }
+      if (filters.isArchived !== undefined) {
+        q = query(q, where('isArchived', '==', filters.isArchived))
+      }
+
+      // Order by creation date (newest first)
+      q = query(q, orderBy('createdAt', 'desc'))
+
+      // Pagination
+      if (lastDoc) {
+        q = query(q, startAfter(lastDoc))
+      }
+      q = query(q, limit(pageSize + 1)) // Get one extra to check if there are more
+
+      const querySnapshot = await getDocs(q)
+      const tasks: Task[] = []
+      const docs = querySnapshot.docs
+
+      docs.slice(0, pageSize).forEach((doc) => {
+        const data = doc.data()
+        tasks.push({
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+          dueDate: data.dueDate?.toDate(),
+          completedAt: data.completedAt?.toDate(),
+        } as Task)
+      })
+
+      const hasNext = docs.length > pageSize
+      const hasPrev = !!lastDoc
+
+      return {
+        items: tasks,
+        total: tasks.length, // Note: Firestore doesn't provide total count efficiently
+        page: 1, // We don't track page numbers with cursor pagination
+        limit: pageSize,
+        hasNext,
+        hasPrev,
+      }
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Update task
+  static async updateTask(taskId: string, updates: Partial<Task>): Promise<void> {
+    try {
+      const taskRef = doc(db, TASKS_COLLECTION, taskId)
+      await updateDoc(taskRef, {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      })
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Update task status
+  static async updateTaskStatus(taskId: string, status: TaskStatus): Promise<void> {
+    try {
+      const taskRef = doc(db, TASKS_COLLECTION, taskId)
+      const updates: any = {
+        status,
+        updatedAt: serverTimestamp(),
+      }
+
+      if (status === 'done') {
+        updates.completedAt = serverTimestamp()
+      }
+
+      await updateDoc(taskRef, updates)
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Delete task
+  static async deleteTask(taskId: string): Promise<void> {
+    try {
+      const taskRef = doc(db, TASKS_COLLECTION, taskId)
+      await deleteDoc(taskRef)
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Archive/Unarchive task
+  static async archiveTask(taskId: string, isArchived: boolean): Promise<void> {
+    try {
+      const taskRef = doc(db, TASKS_COLLECTION, taskId)
+      await updateDoc(taskRef, {
+        isArchived,
+        updatedAt: serverTimestamp(),
+      })
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Add comment to task
+  static async addComment(
+    taskId: string,
+    userId: string,
+    content: string
+  ): Promise<void> {
+    try {
+      const taskRef = doc(db, TASKS_COLLECTION, taskId)
+      const task = await this.getTask(taskId)
+      
+      if (!task) throw new Error('Task not found')
+
+      const newComment = {
+        id: generateId(),
+        content,
+        authorId: userId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isEdited: false,
+        mentions: [], // TODO: Extract mentions from content
+      }
+
+      const updatedComments = [...task.comments, newComment]
+
+      await updateDoc(taskRef, {
+        comments: updatedComments,
+        updatedAt: serverTimestamp(),
+      })
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Increment pomodoro count
+  static async incrementPomodoroCount(taskId: string): Promise<void> {
+    try {
+      const taskRef = doc(db, TASKS_COLLECTION, taskId)
+      const task = await this.getTask(taskId)
+      
+      if (!task) throw new Error('Task not found')
+
+      await updateDoc(taskRef, {
+        pomodoroCount: task.pomodoroCount + 1,
+        updatedAt: serverTimestamp(),
+      })
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Bulk update tasks
+  static async bulkUpdateTasks(
+    updates: Array<{ id: string; data: Partial<Task> }>
+  ): Promise<void> {
+    try {
+      const batch = writeBatch(db)
+
+      updates.forEach(({ id, data }) => {
+        const taskRef = doc(db, TASKS_COLLECTION, id)
+        batch.update(taskRef, {
+          ...data,
+          updatedAt: serverTimestamp(),
+        })
+      })
+
+      await batch.commit()
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Get user's tasks statistics
+  static async getTasksStats(userId: string, workspaceId?: string): Promise<{
+    total: number
+    completed: number
+    inProgress: number
+    overdue: number
+  }> {
+    try {
+      const filters: TaskFilters = { isArchived: false }
+      if (workspaceId) filters.workspaceId = workspaceId
+      
+      // Get user's assigned tasks
+      const assignedTasks = await this.getTasks({ ...filters, assigneeId: userId }, 1000)
+      
+      // Get tasks created by user
+      const createdQuery = query(
+        collection(db, TASKS_COLLECTION),
+        where('createdById', '==', userId),
+        where('isArchived', '==', false)
+      )
+      const createdSnapshot = await getDocs(createdQuery)
+      
+      const allTasks = [
+        ...assignedTasks.items,
+        ...createdSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate() || new Date(),
+          updatedAt: doc.data().updatedAt?.toDate() || new Date(),
+          dueDate: doc.data().dueDate?.toDate(),
+          completedAt: doc.data().completedAt?.toDate(),
+        } as Task))
+      ]
+
+      // Remove duplicates
+      const uniqueTasks = allTasks.filter((task, index, self) => 
+        index === self.findIndex(t => t.id === task.id)
+      )
+
+      const now = new Date()
+      const stats = {
+        total: uniqueTasks.length,
+        completed: uniqueTasks.filter(task => task.status === 'done').length,
+        inProgress: uniqueTasks.filter(task => task.status === 'in_progress').length,
+        overdue: uniqueTasks.filter(task => 
+          task.dueDate && task.dueDate < now && task.status !== 'done'
+        ).length,
+      }
+
+      return stats
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+}
+
+
+--- src/services/userService.ts ---
+
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp,
+} from 'firebase/firestore'
+import { db } from '@/lib/firebase'
+import { User, UserPreferences } from '@/types'
+import { handleFirebaseError } from './firebase'
+
+const USERS_COLLECTION = 'users'
+
+export class UserService {
+  // Create a new user document
+  static async createUser(userId: string, userData: Partial<User>): Promise<void> {
+    try {
+      const userRef = doc(db, USERS_COLLECTION, userId)
+      
+      const defaultPreferences: UserPreferences = {
+        theme: 'system',
+        language: 'ru',
+        timezone: 'Europe/Moscow',
+        notifications: {
+          email: true,
+          push: true,
+          desktop: true,
+          taskReminders: true,
+          pomodoroBreaks: true,
+          achievements: true,
+          weeklyReports: true,
+        },
+        pomodoro: {
+          workDuration: 25,
+          shortBreakDuration: 5,
+          longBreakDuration: 15,
+          longBreakInterval: 4,
+          autoStartBreaks: false,
+          autoStartPomodoros: false,
+          soundEnabled: true,
+          soundVolume: 50,
+        },
+        gamification: {
+          showBadges: true,
+          showLevel: true,
+          showXP: true,
+          showStreak: true,
+          gardenEnabled: true,
+          soundEffects: true,
+        },
+      }
+
+      const user: User = {
+        id: userId,
+        email: userData.email || '',
+        displayName: userData.displayName || '',
+        photoURL: userData.photoURL,
+        role: 'free',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        preferences: defaultPreferences,
+        achievements: [],
+        level: 1,
+        xp: 0,
+        streakCount: 0,
+        totalTasksCompleted: 0,
+        totalPomodoroCompleted: 0,
+        ...userData,
+      }
+
+      await setDoc(userRef, {
+        ...user,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Get user by ID
+  static async getUser(userId: string): Promise<User | null> {
+    try {
+      const userRef = doc(db, USERS_COLLECTION, userId)
+      const userSnap = await getDoc(userRef)
+      
+      if (userSnap.exists()) {
+        const data = userSnap.data()
+        return {
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+        } as User
+      }
+      
+      return null
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Update user
+  static async updateUser(userId: string, updates: Partial<User>): Promise<void> {
+    try {
+      const userRef = doc(db, USERS_COLLECTION, userId)
+      await updateDoc(userRef, {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      })
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Update user preferences
+  static async updateUserPreferences(
+    userId: string,
+    preferences: Partial<UserPreferences>
+  ): Promise<void> {
+    try {
+      const userRef = doc(db, USERS_COLLECTION, userId)
+      await updateDoc(userRef, {
+        preferences,
+        updatedAt: serverTimestamp(),
+      })
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Add XP to user
+  static async addXP(userId: string, xpAmount: number): Promise<void> {
+    try {
+      const userRef = doc(db, USERS_COLLECTION, userId)
+      const userSnap = await getDoc(userRef)
+      
+      if (userSnap.exists()) {
+        const userData = userSnap.data() as User
+        const newXP = userData.xp + xpAmount
+        const newLevel = this.calculateLevel(newXP)
+        
+        await updateDoc(userRef, {
+          xp: newXP,
+          level: newLevel,
+          updatedAt: serverTimestamp(),
+        })
+      }
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Update streak count
+  static async updateStreak(userId: string, streakCount: number): Promise<void> {
+    try {
+      const userRef = doc(db, USERS_COLLECTION, userId)
+      await updateDoc(userRef, {
+        streakCount,
+        updatedAt: serverTimestamp(),
+      })
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Increment task completion count
+  static async incrementTaskCount(userId: string): Promise<void> {
+    try {
+      const userRef = doc(db, USERS_COLLECTION, userId)
+      const userSnap = await getDoc(userRef)
+      
+      if (userSnap.exists()) {
+        const userData = userSnap.data() as User
+        await updateDoc(userRef, {
+          totalTasksCompleted: userData.totalTasksCompleted + 1,
+          updatedAt: serverTimestamp(),
+        })
+      }
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Increment pomodoro completion count
+  static async incrementPomodoroCount(userId: string): Promise<void> {
+    try {
+      const userRef = doc(db, USERS_COLLECTION, userId)
+      const userSnap = await getDoc(userRef)
+      
+      if (userSnap.exists()) {
+        const userData = userSnap.data() as User
+        await updateDoc(userRef, {
+          totalPomodoroCompleted: userData.totalPomodoroCompleted + 1,
+          updatedAt: serverTimestamp(),
+        })
+      }
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Delete user
+  static async deleteUser(userId: string): Promise<void> {
+    try {
+      const userRef = doc(db, USERS_COLLECTION, userId)
+      await deleteDoc(userRef)
+    } catch (error) {
+      throw new Error(handleFirebaseError(error))
+    }
+  }
+
+  // Helper method to calculate level from XP
+  private static calculateLevel(xp: number): number {
+    const baseXP = 100
+    const multiplier = 1.5
+    let level = 1
+    let requiredXP = 0
+    
+    while (requiredXP <= xp) {
+      level++
+      requiredXP += Math.floor(baseXP * Math.pow(multiplier, level - 2))
+    }
+    
+    return level - 1
+  }
+}
+
+
+--- src/stores/appStore.ts ---
+
+import { create } from 'zustand'
+import { devtools, persist } from 'zustand/middleware'
+import { immer } from 'zustand/middleware/immer'
+import { User, Workspace, Project } from '@/types'
+
+interface AppState {
+  // User state
+  currentUser: User | null
+  
+  // Current workspace and project
+  currentWorkspace: Workspace | null
+  currentProject: Project | null
+  
+  // UI state
+  sidebarOpen: boolean
+  theme: 'light' | 'dark' | 'system'
+  
+  // Loading states
+  isLoading: boolean
+  isInitializing: boolean
+  
+  // Error state
+  error: string | null
+  
+  // Actions
+  setCurrentUser: (user: User | null) => void
+  setCurrentWorkspace: (workspace: Workspace | null) => void
+  setCurrentProject: (project: Project | null) => void
+  setSidebarOpen: (open: boolean) => void
+  setTheme: (theme: 'light' | 'dark' | 'system') => void
+  setLoading: (loading: boolean) => void
+  setInitializing: (initializing: boolean) => void
+  setError: (error: string | null) => void
+  clearError: () => void
+  reset: () => void
+}
+
+const initialState = {
+  currentUser: null,
+  currentWorkspace: null,
+  currentProject: null,
+  sidebarOpen: true,
+  theme: 'system' as const,
+  isLoading: false,
+  isInitializing: true,
+  error: null,
+}
+
+export const useAppStore = create<AppState>()(
+  devtools(
+    persist(
+      immer((set) => ({
+        ...initialState,
+
+        setCurrentUser: (user) =>
+          set((state) => {
+            state.currentUser = user
+          }),
+
+        setCurrentWorkspace: (workspace) =>
+          set((state) => {
+            state.currentWorkspace = workspace
+          }),
+
+        setCurrentProject: (project) =>
+          set((state) => {
+            state.currentProject = project
+          }),
+
+        setSidebarOpen: (open) =>
+          set((state) => {
+            state.sidebarOpen = open
+          }),
+
+        setTheme: (theme) =>
+          set((state) => {
+            state.theme = theme
+          }),
+
+        setLoading: (loading) =>
+          set((state) => {
+            state.isLoading = loading
+          }),
+
+        setInitializing: (initializing) =>
+          set((state) => {
+            state.isInitializing = initializing
+          }),
+
+        setError: (error) =>
+          set((state) => {
+            state.error = error
+          }),
+
+        clearError: () =>
+          set((state) => {
+            state.error = null
+          }),
+
+        reset: () =>
+          set((state) => {
+            Object.assign(state, initialState)
+          }),
+      })),
+      {
+        name: 'app-store',
+        partialize: (state) => ({
+          sidebarOpen: state.sidebarOpen,
+          theme: state.theme,
+          currentWorkspace: state.currentWorkspace,
+          currentProject: state.currentProject,
+        }),
+      }
+    ),
+    {
+      name: 'app-store',
+    }
+  )
+)
+
+
+--- src/stores/pomodoroStore.ts ---
+
+import { create } from 'zustand'
+import { devtools } from 'zustand/middleware'
+import { immer } from 'zustand/middleware/immer'
+import { PomodoroSession, PomodoroSettings } from '@/types'
+import { POMODORO } from '@/constants'
+
+type PomodoroStatus = 'idle' | 'running' | 'paused' | 'completed'
+type SessionType = 'work' | 'short_break' | 'long_break'
+
+interface PomodoroState {
+  // Timer state
+  timeRemaining: number
+  totalTime: number
+  status: PomodoroStatus
+  sessionType: SessionType
+  currentSession: PomodoroSession | null
+  
+  // Session tracking
+  completedPomodoros: number
+  dailyGoal: number
+  
+  // Settings
+  settings: PomodoroSettings
+  
+  // Current task
+  currentTaskId: string | null
+  
+  // Actions
+  startTimer: (taskId?: string) => void
+  pauseTimer: () => void
+  resumeTimer: () => void
+  stopTimer: () => void
+  completeSession: () => void
+  skipSession: () => void
+  resetTimer: () => void
+  setTimeRemaining: (time: number) => void
+  setSettings: (settings: Partial<PomodoroSettings>) => void
+  setDailyGoal: (goal: number) => void
+  setCurrentTask: (taskId: string | null) => void
+  tick: () => void
+}
+
+const defaultSettings: PomodoroSettings = {
+  workDuration: POMODORO.DEFAULT_WORK_DURATION / 60, // Convert to minutes
+  shortBreakDuration: POMODORO.DEFAULT_SHORT_BREAK / 60,
+  longBreakDuration: POMODORO.DEFAULT_LONG_BREAK / 60,
+  longBreakInterval: POMODORO.DEFAULT_LONG_BREAK_INTERVAL,
+  autoStartBreaks: false,
+  autoStartPomodoros: false,
+  soundEnabled: true,
+  soundVolume: 50,
+}
+
+const initialState = {
+  timeRemaining: defaultSettings.workDuration * 60,
+  totalTime: defaultSettings.workDuration * 60,
+  status: 'idle' as PomodoroStatus,
+  sessionType: 'work' as SessionType,
+  currentSession: null,
+  completedPomodoros: 0,
+  dailyGoal: 8,
+  settings: defaultSettings,
+  currentTaskId: null,
+}
+
+export const usePomodoroStore = create<PomodoroState>()(
+  devtools(
+    immer((set) => ({
+      ...initialState,
+
+      startTimer: (taskId) =>
+        set((state) => {
+          const { settings, sessionType } = state
+          let duration: number
+
+          switch (sessionType) {
+            case 'work':
+              duration = settings.workDuration * 60
+              break
+            case 'short_break':
+              duration = settings.shortBreakDuration * 60
+              break
+            case 'long_break':
+              duration = settings.longBreakDuration * 60
+              break
+          }
+
+          state.status = 'running'
+          state.timeRemaining = duration
+          state.totalTime = duration
+          state.currentTaskId = taskId || null
+          
+          // Create new session
+          state.currentSession = {
+            id: Date.now().toString(),
+            taskId: taskId,
+            workspaceId: '', // TODO: Get from current workspace
+            userId: '', // TODO: Get from current user
+            type: sessionType,
+            duration,
+            startTime: new Date(),
+            isCompleted: false,
+            isPaused: false,
+            pausedDuration: 0,
+            tags: [],
+          }
+        }),
+
+      pauseTimer: () =>
+        set((state) => {
+          if (state.status === 'running') {
+            state.status = 'paused'
+            if (state.currentSession) {
+              state.currentSession.isPaused = true
+            }
+          }
+        }),
+
+      resumeTimer: () =>
+        set((state) => {
+          if (state.status === 'paused') {
+            state.status = 'running'
+            if (state.currentSession) {
+              state.currentSession.isPaused = false
+            }
+          }
+        }),
+
+      stopTimer: () =>
+        set((state) => {
+          state.status = 'idle'
+          state.timeRemaining = state.totalTime
+          state.currentSession = null
+          state.currentTaskId = null
+        }),
+
+      completeSession: () =>
+        set((state) => {
+          if (state.currentSession) {
+            state.currentSession.isCompleted = true
+            state.currentSession.endTime = new Date()
+          }
+
+          if (state.sessionType === 'work') {
+            state.completedPomodoros += 1
+            
+            // Determine next session type
+            const isLongBreakTime = 
+              state.completedPomodoros % state.settings.longBreakInterval === 0
+            
+            state.sessionType = isLongBreakTime ? 'long_break' : 'short_break'
+          } else {
+            state.sessionType = 'work'
+          }
+
+          state.status = 'completed'
+          state.timeRemaining = 0
+        }),
+
+      skipSession: () =>
+        set((state) => {
+          if (state.sessionType === 'work') {
+            const isLongBreakTime = 
+              (state.completedPomodoros + 1) % state.settings.longBreakInterval === 0
+            state.sessionType = isLongBreakTime ? 'long_break' : 'short_break'
+          } else {
+            state.sessionType = 'work'
+          }
+
+          state.status = 'idle'
+          state.currentSession = null
+          state.currentTaskId = null
+        }),
+
+      resetTimer: () =>
+        set((state) => {
+          Object.assign(state, initialState)
+        }),
+
+      setTimeRemaining: (time) =>
+        set((state) => {
+          state.timeRemaining = time
+        }),
+
+      setSettings: (newSettings) =>
+        set((state) => {
+          state.settings = { ...state.settings, ...newSettings }
+          
+          // Update timer if idle and session type matches
+          if (state.status === 'idle') {
+            switch (state.sessionType) {
+              case 'work':
+                state.timeRemaining = state.settings.workDuration * 60
+                state.totalTime = state.settings.workDuration * 60
+                break
+              case 'short_break':
+                state.timeRemaining = state.settings.shortBreakDuration * 60
+                state.totalTime = state.settings.shortBreakDuration * 60
+                break
+              case 'long_break':
+                state.timeRemaining = state.settings.longBreakDuration * 60
+                state.totalTime = state.settings.longBreakDuration * 60
+                break
+            }
+          }
+        }),
+
+      setDailyGoal: (goal) =>
+        set((state) => {
+          state.dailyGoal = goal
+        }),
+
+      setCurrentTask: (taskId) =>
+        set((state) => {
+          state.currentTaskId = taskId
+        }),
+
+      tick: () =>
+        set((state) => {
+          if (state.status === 'running' && state.timeRemaining > 0) {
+            state.timeRemaining -= 1
+            
+            if (state.timeRemaining === 0) {
+              // Auto-complete session
+              if (state.currentSession) {
+                state.currentSession.isCompleted = true
+                state.currentSession.endTime = new Date()
+              }
+
+              if (state.sessionType === 'work') {
+                state.completedPomodoros += 1
+                
+                const isLongBreakTime = 
+                  state.completedPomodoros % state.settings.longBreakInterval === 0
+                
+                state.sessionType = isLongBreakTime ? 'long_break' : 'short_break'
+              } else {
+                state.sessionType = 'work'
+              }
+
+              state.status = 'completed'
+            }
+          }
+        }),
+    })),
+    {
+      name: 'pomodoro-store',
+    }
+  )
+)
+
+
+--- src/types/index.ts ---
+
+// Пользователь
+export interface User {
+  id: string
+  email: string
+  displayName: string
+  photoURL?: string
+  role: 'free' | 'premium' | 'admin'
+  createdAt: Date
+  updatedAt: Date
+  preferences: UserPreferences
+  achievements: string[]
+  level: number
+  xp: number
+  streakCount: number
+  totalTasksCompleted: number
+  totalPomodoroCompleted: number
+}
+
+export interface UserPreferences {
+  theme: 'light' | 'dark' | 'system'
+  language: string
+  timezone: string
+  notifications: NotificationSettings
+  pomodoro: PomodoroSettings
+  gamification: GamificationSettings
+}
+
+export interface NotificationSettings {
+  email: boolean
+  push: boolean
+  desktop: boolean
+  taskReminders: boolean
+  pomodoroBreaks: boolean
+  achievements: boolean
+  weeklyReports: boolean
+}
+
+export interface PomodoroSettings {
+  workDuration: number // в минутах
+  shortBreakDuration: number
+  longBreakDuration: number
+  longBreakInterval: number // после скольких циклов
+  autoStartBreaks: boolean
+  autoStartPomodoros: boolean
+  soundEnabled: boolean
+  soundVolume: number
+}
+
+export interface GamificationSettings {
+  showBadges: boolean
+  showLevel: boolean
+  showXP: boolean
+  showStreak: boolean
+  gardenEnabled: boolean
+  soundEffects: boolean
+}
+
+// Рабочие пространства
+export interface Workspace {
+  id: string
+  name: string
+  description?: string
+  ownerId: string
+  type: 'personal' | 'team'
+  members: WorkspaceMember[]
+  createdAt: Date
+  updatedAt: Date
+  settings: WorkspaceSettings
+  isArchived: boolean
+}
+
+export interface WorkspaceMember {
+  userId: string
+  email: string
+  displayName: string
+  role: 'owner' | 'admin' | 'member' | 'viewer'
+  joinedAt: Date
+  permissions: Permission[]
+}
+
+export interface Permission {
+  resource: 'tasks' | 'projects' | 'members' | 'settings'
+  actions: ('create' | 'read' | 'update' | 'delete')[]
+}
+
+export interface WorkspaceSettings {
+  isPublic: boolean
+  allowMemberInvites: boolean
+  defaultTaskView: 'list' | 'kanban' | 'calendar' | 'timeline'
+  workingHours: {
+    start: string // HH:mm
+    end: string // HH:mm
+    workDays: number[] // 0-6, 0 = воскресенье
+  }
+  timezone: string
+}
+
+// Проекты
+export interface Project {
+  id: string
+  name: string
+  description?: string
+  color: string
+  icon?: string
+  workspaceId: string
+  ownerId: string
+  isArchived: boolean
+  createdAt: Date
+  updatedAt: Date
+  settings: ProjectSettings
+  stats: ProjectStats
+}
+
+export interface ProjectSettings {
+  isPublic: boolean
+  defaultAssignee?: string
+  template?: TaskTemplate
+  autoArchive: boolean
+  autoArchiveDays: number
+}
+
+export interface ProjectStats {
+  totalTasks: number
+  completedTasks: number
+  activeTasks: number
+  overdueTasks: number
+  totalTimeSpent: number // в минутах
+}
+
+export interface TaskTemplate {
+  title: string
+  description?: string
+  priority: TaskPriority
+  estimatedDuration?: number
+  tags: string[]
+  subtasks: Omit<TaskTemplate, 'subtasks'>[]
+}
+
+// Задачи
+export interface Task {
+  id: string
+  title: string
+  description?: string
+  projectId?: string
+  workspaceId: string
+  assigneeId?: string
+  createdById: string
+  parentId?: string // для подзадач
+  status: TaskStatus
+  priority: TaskPriority
+  tags: string[]
+  dueDate?: Date
+  createdAt: Date
+  updatedAt: Date
+  completedAt?: Date
+  estimatedDuration?: number // в минутах
+  actualDuration?: number // в минутах
+  pomodoroCount: number
+  attachments: TaskAttachment[]
+  comments: TaskComment[]
+  dependencies: TaskDependency[]
+  customFields: Record<string, any>
+  isArchived: boolean
+}
+
+export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done' | 'cancelled'
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent'
+
+export interface TaskAttachment {
+  id: string
+  name: string
+  url: string
+  type: string
+  size: number
+  uploadedAt: Date
+  uploadedBy: string
+}
+
+export interface TaskComment {
+  id: string
+  content: string
+  authorId: string
+  createdAt: Date
+  updatedAt: Date
+  isEdited: boolean
+  mentions: string[]
+}
+
+export interface TaskDependency {
+  id: string
+  type: 'blocks' | 'blocked_by'
+  taskId: string
+}
+
+// Пользовательские представления
+export interface CustomView {
+  id: string
+  name: string
+  description?: string
+  workspaceId: string
+  createdById: string
+  type: 'list' | 'kanban' | 'calendar' | 'timeline' | 'analytics'
+  filters: ViewFilter[]
+  sorting: ViewSorting[]
+  grouping?: ViewGrouping
+  settings: ViewSettings
+  isShared: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface ViewFilter {
+  field: string
+  operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'in' | 'not_in' | 'is_empty' | 'is_not_empty'
+  value: any
+  logic?: 'and' | 'or'
+}
+
+export interface ViewSorting {
+  field: string
+  direction: 'asc' | 'desc'
+}
+
+export interface ViewGrouping {
+  field: string
+  showEmptyGroups: boolean
+}
+
+export interface ViewSettings {
+  columns?: string[] // для списочного представления
+  showSubtasks: boolean
+  showCompleted: boolean
+  showArchived: boolean
+  colorBy?: string
+  density: 'compact' | 'normal' | 'comfortable'
+}
+
+// Pomodoro
+export interface PomodoroSession {
+  id: string
+  taskId?: string
+  workspaceId: string
+  userId: string
+  type: 'work' | 'short_break' | 'long_break'
+  duration: number // в секундах
+  startTime: Date
+  endTime?: Date
+  isCompleted: boolean
+  isPaused: boolean
+  pausedDuration: number // в секундах
+  tags: string[]
+  notes?: string
+}
+
+// Достижения и геймификация
+export interface Achievement {
+  id: string
+  name: string
+  description: string
+  icon: string
+  category: 'tasks' | 'pomodoro' | 'streak' | 'social' | 'garden'
+  type: 'single' | 'progressive'
+  requirements: AchievementRequirement[]
+  rewards: AchievementReward[]
+  isSecret: boolean
+}
+
+export interface AchievementRequirement {
+  type: 'task_count' | 'pomodoro_count' | 'streak_days' | 'level_reached' | 'custom'
+  value: number
+  timeframe?: 'daily' | 'weekly' | 'monthly' | 'all_time'
+}
+
+export interface AchievementReward {
+  type: 'xp' | 'badge' | 'garden_item' | 'custom'
+  value: number | string
+}
+
+export interface UserAchievement {
+  achievementId: string
+  userId: string
+  unlockedAt: Date
+  progress: number // 0-100
+}
+
+// Сад
+export interface GardenPlant {
+  id: string
+  name: string
+  description: string
+  icon: string
+  rarity: 'common' | 'rare' | 'epic' | 'legendary'
+  unlockRequirements: AchievementRequirement[]
+  growthStages: GrowthStage[]
+}
+
+export interface GrowthStage {
+  name: string
+  icon: string
+  requiredXP: number
+  duration: number // в часах
+}
+
+export interface UserGardenPlant {
+  id: string
+  userId: string
+  plantId: string
+  plantedAt: Date
+  currentStage: number
+  currentXP: number
+  position: { x: number; y: number }
+  isWatered: boolean
+  lastWateredAt?: Date
+}
+
+// Уведомления
+export interface Notification {
+  id: string
+  userId: string
+  type: 'task_reminder' | 'pomodoro_break' | 'achievement' | 'invitation' | 'mention' | 'system'
+  title: string
+  message: string
+  data?: Record<string, any>
+  isRead: boolean
+  createdAt: Date
+  scheduledFor?: Date
+}
+
+// Аналитика
+export interface AnalyticsData {
+  period: 'day' | 'week' | 'month' | 'year'
+  startDate: Date
+  endDate: Date
+  metrics: {
+    tasksCompleted: number
+    tasksCreated: number
+    pomodoroSessions: number
+    timeSpent: number // в минутах
+    productivity: number // 0-100
+    streakDays: number
+    xpGained: number
+  }
+  charts: {
+    tasksPerDay: { date: string; count: number }[]
+    pomodoroPerDay: { date: string; count: number; duration: number }[]
+    productivityTrend: { date: string; score: number }[]
+    categoryBreakdown: { category: string; count: number; percentage: number }[]
+  }
+}
+
+// API Response типы
+export interface ApiResponse<T = any> {
+  success: boolean
+  data?: T
+  error?: string
+  message?: string
+}
+
+export interface PaginatedResponse<T = any> {
+  items: T[]
+  total: number
+  page: number
+  limit: number
+  hasNext: boolean
+  hasPrev: boolean
+}
+
+// Формы
+export interface LoginForm {
+  email: string
+  password: string
+  rememberMe: boolean
+}
+
+export interface RegisterForm {
+  email: string
+  password: string
+  confirmPassword: string
+  displayName: string
+  acceptTerms: boolean
+}
+
+export interface TaskForm {
+  title: string
+  description?: string
+  projectId?: string
+  assigneeId?: string
+  priority: TaskPriority
+  tags: string[]
+  dueDate?: Date
+  estimatedDuration?: number
+}
+
+export interface ProjectForm {
+  name: string
+  description?: string
+  color: string
+  icon?: string
+  isPublic: boolean
+}
+
+export interface WorkspaceForm {
+  name: string
+  description?: string
+  type: 'personal' | 'team'
+  isPublic: boolean
+}
+
+// Константы
+export const TASK_PRIORITIES: Record<TaskPriority, { label: string; color: string; icon: string }> = {
+  low: { label: 'Низкий', color: 'text-green-600', icon: '🔵' },
+  medium: { label: 'Средний', color: 'text-yellow-600', icon: '🟡' },
+  high: { label: 'Высокий', color: 'text-orange-600', icon: '🟠' },
+  urgent: { label: 'Срочный', color: 'text-red-600', icon: '🔴' }
+}
+
+export const TASK_STATUSES: Record<TaskStatus, { label: string; color: string; icon: string }> = {
+  todo: { label: 'К выполнению', color: 'text-gray-600', icon: '⚪' },
+  in_progress: { label: 'В работе', color: 'text-blue-600', icon: '🔵' },
+  review: { label: 'На проверке', color: 'text-purple-600', icon: '🟣' },
+  done: { label: 'Выполнено', color: 'text-green-600', icon: '✅' },
+  cancelled: { label: 'Отменено', color: 'text-red-600', icon: '❌' }
+}
+
+
+--- src/utils/dateTime.ts ---
+
+// Utility functions for date-time manipulations
+
+// Format a date as 'YYYY-MM-DD'
+export function formatDate(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+// Calculate difference in days between two dates
+export function dateDiffInDays(a: Date, b: Date): number {
+  const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+  // Discard time and time-zone information.
+  const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+  const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+  return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+}
+
+// Check if a date is today
+export function isToday(date: Date): boolean {
+  const today = new Date();
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  );
+}
+
+
+--- src/utils/helpers.ts ---
+
+import { type ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+// Combine class names utility
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+// Generate unique ID
+export function generateId(): string {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36)
+}
+
+// Debounce function
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  delay: number
+): (...args: Parameters<T>) => void {
+  let timeoutId: NodeJS.Timeout
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => func(...args), delay)
+  }
+}
+
+// Throttle function
+export function throttle<T extends (...args: any[]) => any>(
+  func: T,
+  limit: number
+): (...args: Parameters<T>) => void {
+  let inThrottle: boolean
+  return (...args: Parameters<T>) => {
+    if (!inThrottle) {
+      func(...args)
+      inThrottle = true
+      setTimeout(() => (inThrottle = false), limit)
+    }
+  }
+}
+
+// Format file size
+export function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+// Format duration in seconds to human readable format
+export function formatDuration(seconds: number): string {
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const remainingSeconds = seconds % 60
+
+  if (hours > 0) {
+    return `${hours}ч ${minutes}м ${remainingSeconds}с`
+  } else if (minutes > 0) {
+    return `${minutes}м ${remainingSeconds}с`
+  } else {
+    return `${remainingSeconds}с`
+  }
+}
+
+// Calculate XP required for a specific level
+export function calculateXPForLevel(level: number): number {
+  const baseXP = 100
+  const multiplier = 1.5
+  return Math.floor(baseXP * Math.pow(multiplier, level - 1))
+}
+
+// Calculate level from total XP
+export function calculateLevelFromXP(totalXP: number): number {
+  let level = 1
+  let requiredXP = 0
+  
+  while (requiredXP <= totalXP) {
+    level++
+    requiredXP += calculateXPForLevel(level)
+  }
+  
+  return level - 1
+}
+
+// Get XP progress for current level
+export function getXPProgress(totalXP: number): { currentLevel: number; currentLevelXP: number; nextLevelXP: number; progress: number } {
+  const currentLevel = calculateLevelFromXP(totalXP)
+  const currentLevelStartXP = Array.from({ length: currentLevel - 1 }, (_, i) => calculateXPForLevel(i + 1)).reduce((a, b) => a + b, 0)
+  const currentLevelXP = totalXP - currentLevelStartXP
+  const nextLevelXP = calculateXPForLevel(currentLevel + 1)
+  const progress = Math.round((currentLevelXP / nextLevelXP) * 100)
+
+  return {
+    currentLevel,
+    currentLevelXP,
+    nextLevelXP,
+    progress
+  }
+}
+
+// Capitalize first letter
+export function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+// Truncate text
+export function truncate(text: string, length: number): string {
+  if (text.length <= length) return text
+  return text.substring(0, length) + '...'
+}
+
+// Format number with thousand separators
+export function formatNumber(num: number): string {
+  return num.toLocaleString('ru-RU')
+}
+
+// Get random element from array
+export function getRandomElement<T>(array: T[]): T {
+  return array[Math.floor(Math.random() * array.length)]
+}
+
+// Sleep function for async operations
+export function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+
