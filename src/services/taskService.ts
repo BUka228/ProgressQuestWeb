@@ -54,21 +54,15 @@ export class TaskService {
     try {
       const taskRef = collection(db, TASKS_COLLECTION)
       
-      const task: Omit<Task, 'id'> = {
+      const task: any = {
         title: taskData.title,
-        description: taskData.description,
         workspaceId: taskData.workspaceId,
-        projectId: taskData.projectId,
-        assigneeId: taskData.assigneeId,
         createdById: userId,
-        parentId: taskData.parentId,
-        status: 'todo',
+        status: 'TODO',
         priority: taskData.priority,
         tags: taskData.tags || [],
-        dueDate: taskData.dueDate,
         createdAt: new Date(),
         updatedAt: new Date(),
-        estimatedDuration: taskData.estimatedDuration,
         pomodoroCount: 0,
         attachments: [],
         comments: [],
@@ -76,6 +70,15 @@ export class TaskService {
         customFields: {},
         isArchived: false,
       }
+
+      if (taskData.description !== undefined) task.description = taskData.description
+      if (taskData.projectId !== undefined) task.projectId = taskData.projectId
+      if (taskData.assigneeId !== undefined) task.assigneeId = taskData.assigneeId
+      // --- ИСПРАВЛЕНО ЗДЕСЬ ---
+      if (taskData.parentId !== undefined) task.parentId = taskData.parentId
+      // ------------------------
+      if (taskData.dueDate) task.dueDate = new Date(taskData.dueDate)
+      if (taskData.estimatedDuration !== undefined) task.estimatedDuration = taskData.estimatedDuration
 
       const docRef = await addDoc(taskRef, {
         ...task,
@@ -187,8 +190,16 @@ export class TaskService {
   static async updateTask(taskId: string, updates: Partial<Task>): Promise<void> {
     try {
       const taskRef = doc(db, TASKS_COLLECTION, taskId)
+      // Убираем undefined поля из updates
+      const cleanUpdates: any = {}
+      Object.keys(updates).forEach(key => {
+        if (updates[key as keyof Task] !== undefined) {
+          cleanUpdates[key] = updates[key as keyof Task]
+        }
+      })
+      
       await updateDoc(taskRef, {
-        ...updates,
+        ...cleanUpdates,
         updatedAt: serverTimestamp(),
       })
     } catch (error) {
