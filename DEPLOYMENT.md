@@ -8,11 +8,14 @@
 ✅ Система рабочих пространств реализована  
 ✅ CRUD операции для workspace работают  
 ✅ Аутентификация настроена  
+✅ TypeScript ошибки исправлены  
+✅ Продакшен сборка готова  
+✅ Регион Functions зафиксирован на europe-west1
 
 ### Требования для деплоя
 
 1. **Firebase проект настроен** с ID: `progress-quest-universal`
-2. **Cloud Functions развернуты** в регионе `us-central1`
+2. **Cloud Functions развернуты** в регионе `europe-west1`
 3. **Firestore правила настроены**
 4. **Authentication включен** (Google Provider)
 
@@ -45,7 +48,7 @@ firebase deploy
 ```env
 VITE_USE_FIREBASE_EMULATORS=false
 VITE_APP_ENVIRONMENT=production
-VITE_FIREBASE_FUNCTIONS_REGION=us-central1
+VITE_FIREBASE_FUNCTIONS_REGION=europe-west1
 ```
 
 ### Проверка после деплоя

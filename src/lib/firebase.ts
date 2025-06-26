@@ -23,7 +23,7 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 // Получение инстансов сервисов
 const auth = getAuth(app);
 const db = getFirestore(app);
-const functions = getFunctions(app, import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || "us-central1");
+const functions = getFunctions(app, "europe-west1");
 const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();
 

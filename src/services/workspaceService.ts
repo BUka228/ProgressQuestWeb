@@ -1,8 +1,7 @@
-import { 
-  getFunctions, 
-  httpsCallable
-} from 'firebase/functions'
+import { httpsCallable } from 'firebase/functions'
 import { getAuth } from 'firebase/auth'
+// Импортируем наш сконфигурированный инстанс functions
+import { functions } from '@/lib/firebase'
 
 // Типы для workspace API
 export interface CreateWorkspacePayload {
@@ -62,10 +61,8 @@ export interface DeleteWorkspaceResponse {
 }
 
 class WorkspaceService {
-  private functions = getFunctions()
-  
   constructor() {
-    console.log('✅ WorkspaceService initialized for production')
+    console.log('✅ WorkspaceService initialized for production with europe-west1 region')
   }
 
   /**
@@ -79,7 +76,7 @@ class WorkspaceService {
       }
 
       const createWorkspaceFunction = httpsCallable<CreateWorkspacePayload, CreateWorkspaceResponse>(
-        this.functions,
+        functions,
         'createWorkspace'
       )
 
@@ -87,7 +84,8 @@ class WorkspaceService {
       return result.data
     } catch (error: any) {
       console.error('Ошибка создания рабочего пространства:', error)
-      throw new Error(error.message || 'Не удалось создать рабочее пространство')
+      const errorMessage = this.getErrorMessage(error)
+      throw new Error(errorMessage)
     }
   }
 
@@ -102,7 +100,7 @@ class WorkspaceService {
       }
 
       const getUserWorkspacesFunction = httpsCallable<void, GetUserWorkspacesResponse>(
-        this.functions,
+        functions,
         'getUserWorkspaces'
       )
 
@@ -110,7 +108,8 @@ class WorkspaceService {
       return result.data
     } catch (error: any) {
       console.error('Ошибка получения рабочих пространств:', error)
-      throw new Error(error.message || 'Не удалось загрузить рабочие пространства')
+      const errorMessage = this.getErrorMessage(error)
+      throw new Error(errorMessage)
     }
   }
 
@@ -127,13 +126,14 @@ class WorkspaceService {
       const getWorkspaceDetailsFunction = httpsCallable<
         { workspaceId: string },
         GetWorkspaceDetailsResponse
-      >(this.functions, 'getWorkspaceDetails')
+      >(functions, 'getWorkspaceDetails')
 
       const result = await getWorkspaceDetailsFunction({ workspaceId })
       return result.data
     } catch (error: any) {
       console.error('Ошибка получения деталей рабочего пространства:', error)
-      throw new Error(error.message || 'Не удалось загрузить детали рабочего пространства')
+      const errorMessage = this.getErrorMessage(error)
+      throw new Error(errorMessage)
     }
   }
 
@@ -148,7 +148,7 @@ class WorkspaceService {
       }
 
       const updateWorkspaceFunction = httpsCallable<UpdateWorkspacePayload, UpdateWorkspaceResponse>(
-        this.functions,
+        functions,
         'updateWorkspace'
       )
 
@@ -156,7 +156,8 @@ class WorkspaceService {
       return result.data
     } catch (error: any) {
       console.error('Ошибка обновления рабочего пространства:', error)
-      throw new Error(error.message || 'Не удалось обновить рабочее пространство')
+      const errorMessage = this.getErrorMessage(error)
+      throw new Error(errorMessage)
     }
   }
 
@@ -173,13 +174,14 @@ class WorkspaceService {
       const deleteWorkspaceFunction = httpsCallable<
         { workspaceId: string },
         DeleteWorkspaceResponse
-      >(this.functions, 'deleteWorkspace')
+      >(functions, 'deleteWorkspace')
 
       const result = await deleteWorkspaceFunction({ workspaceId })
       return result.data
     } catch (error: any) {
       console.error('Ошибка удаления рабочего пространства:', error)
-      throw new Error(error.message || 'Не удалось удалить рабочее пространство')
+      const errorMessage = this.getErrorMessage(error)
+      throw new Error(errorMessage)
     }
   }
 }
