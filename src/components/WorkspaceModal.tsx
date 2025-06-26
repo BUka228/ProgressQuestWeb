@@ -158,10 +158,14 @@ export const WorkspaceModal: React.FC<WorkspaceModalProps> = ({
       const payload: CreateWorkspacePayload = {
         name: formData.name.trim(),
         description: formData.description.trim() || null,
-        isPersonal: formData.isPersonal,
         activeApproach: formData.activeApproach,
         defaultTags: formData.defaultTags,
         settings: formData.settings,
+      }
+
+      // Добавляем isPersonal только для создания нового workspace
+      if (mode === 'create') {
+        (payload as any).isPersonal = formData.isPersonal
       }
 
       await onSubmit(payload)

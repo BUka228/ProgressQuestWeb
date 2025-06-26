@@ -184,6 +184,40 @@ class WorkspaceService {
       throw new Error(errorMessage)
     }
   }
+
+  /**
+   * Преобразование ошибок Firebase в понятные сообщения
+   */
+  private getErrorMessage(error: any): string {
+    // Если это ошибка Firebase Functions
+    if (error.code) {
+      switch (error.code) {
+        case 'functions/not-found':
+          return 'Cloud Functions не развернуты или функция не найдена. Обратитесь к администратору.'
+        case 'functions/internal':
+          return 'Внутренняя ошибка сервера. Попробуйте позже или обратитесь к администратору.'
+        case 'functions/unauthenticated':
+          return 'Необходимо войти в систему для выполнения этого действия.'
+        case 'functions/permission-denied':
+          return 'У вас недостаточно прав для выполнения этого действия.'
+        case 'functions/deadline-exceeded':
+          return 'Превышено время ожидания. Проверьте подключение к интернету.'
+        case 'functions/unavailable':
+          return 'Сервис временно недоступен. Попробуйте позже.'
+        case 'functions/resource-exhausted':
+          return 'Превышен лимит запросов. Попробуйте позже.'
+        default:
+          return error.message || 'Произошла неизвестная ошибка.'
+      }
+    }
+
+    // Для других типов ошибок
+    if (error.message) {
+      return error.message
+    }
+
+    return 'Произошла неизвестная ошибка.'
+  }
 }
 
 // Экспортируем единственный экземпляр сервиса

@@ -224,6 +224,8 @@ export const getWorkspaceDetails = functions.https.onCall(
 // Функция для обновления рабочего пространства
 export const updateWorkspace = functions.https.onCall(
   async (data: UpdateWorkspacePayload, context) => {
+    console.log('updateWorkspace called with data:', JSON.stringify(data, null, 2));
+    
     if (!context.auth) {
       throw new functions.https.HttpsError('unauthenticated', 'Пользователь не авторизован');
     }
@@ -232,7 +234,14 @@ export const updateWorkspace = functions.https.onCall(
     const { workspaceId, ...updateData } = data;
     const db = admin.firestore();
 
+    console.log('Update data received:', { workspaceId, updateData, uid });
+
     try {
+      // Проверяем, что workspaceId предоставлен
+      if (!workspaceId) {
+        throw new functions.https.HttpsError('invalid-argument', 'workspaceId обязателен');
+      }
+
       // Проверяем права доступа (должен быть владелец или админ)
       const membershipSnapshot = await db
         .collection('workspace_members')
@@ -241,23 +250,49 @@ export const updateWorkspace = functions.https.onCall(
         .limit(1)
         .get();
 
+      console.log('Membership check:', { 
+        workspaceId, 
+        uid, 
+        foundMembership: !membershipSnapshot.empty 
+      });
+
       if (membershipSnapshot.empty) {
         throw new functions.https.HttpsError('permission-denied', 'Нет доступа к рабочему пространству');
       }
 
       const membership = membershipSnapshot.docs[0].data();
+      console.log('User membership role:', membership.role);
+      
       if (!['owner', 'admin'].includes(membership.role)) {
         throw new functions.https.HttpsError('permission-denied', 'Недостаточно прав для изменения рабочего пространства');
       }
 
-      // Обновляем workspace
+      // Проверяем, что workspace существует
       const workspaceRef = db.collection('workspaces').doc(workspaceId);
+      const currentWorkspace = await workspaceRef.get();
+      
+      if (!currentWorkspace.exists) {
+        throw new functions.https.HttpsError('not-found', 'Рабочее пространство не найдено');
+      }
+
+      // Фильтруем и очищаем данные для обновления
+      const cleanUpdateData: any = {};
+      
+      if (updateData.name !== undefined) cleanUpdateData.name = updateData.name;
+      if (updateData.description !== undefined) cleanUpdateData.description = updateData.description;
+      if (updateData.activeApproach !== undefined) cleanUpdateData.activeApproach = updateData.activeApproach;
+      if (updateData.defaultTags !== undefined) cleanUpdateData.defaultTags = updateData.defaultTags;
+      if (updateData.settings !== undefined) cleanUpdateData.settings = updateData.settings;
+      
       const updatePayload = {
-        ...updateData,
+        ...cleanUpdateData,
         updatedAt: admin.firestore.Timestamp.now(),
       };
 
+      console.log('Final update payload:', updatePayload);
+
       await workspaceRef.update(updatePayload);
+      console.log('Workspace updated successfully');
 
       // Получаем обновленные данные
       const updatedDoc = await workspaceRef.get();
@@ -278,13 +313,20 @@ export const updateWorkspace = functions.https.onCall(
         currentUserWorkspaceRole: membership.role,
       };
 
+      console.log('Returning updated workspace:', updatedWorkspace.name);
       return { success: true, updatedWorkspace };
     } catch (error) {
       console.error('Ошибка обновления workspace:', error);
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        stack: error.stack
+      });
+      
       if (error instanceof functions.https.HttpsError) {
         throw error;
       }
-      throw new functions.https.HttpsError('internal', 'Ошибка обновления рабочего пространства');
+      throw new functions.https.HttpsError('internal', `Failed to update workspace: ${error.message}`);
     }
   }
 );

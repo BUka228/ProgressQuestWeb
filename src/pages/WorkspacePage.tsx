@@ -47,12 +47,7 @@ export const WorkspacesPage: React.FC = () => {
   const updateWorkspaceMutation = useUpdateWorkspace()
   const deleteWorkspaceMutation = useDeleteWorkspace()
 
-  // Синхронизация данных с сервера
-  useEffect(() => {
-    if (workspacesData?.workspaces) {
-      setWorkspaces(workspacesData.workspaces)
-    }
-  }, [workspacesData, setWorkspaces])
+  // Больше не нужно синхронизировать с Zustand - используем React Query напрямую
 
   // Обработка URL параметра create
   useEffect(() => {
@@ -67,9 +62,72 @@ export const WorkspacesPage: React.FC = () => {
     }
   }, [searchParams, setSearchParams])
 
-  // Получаем отфильтрованные рабочие пространства
-  const filteredWorkspaces = getFilteredWorkspaces()
-  const allTags = getAllTags()
+  // Получаем отфильтрованные рабочие пространства напрямую из React Query
+  const currentWorkspaces = workspacesData?.workspaces || []
+  
+  // Применяем фильтры локально для демонстрации
+  const filteredWorkspaces = React.useMemo(() => {
+    let filtered = [...currentWorkspaces]
+    
+    // Фильтрация по типу
+    if (showPersonalOnly) {
+      filtered = filtered.filter(ws => ws.isPersonal)
+    } else if (showTeamOnly) {
+      filtered = filtered.filter(ws => !ws.isPersonal)
+    }
+    
+    // Поиск по названию и описанию
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(ws =>
+        ws.name.toLowerCase().includes(query) ||
+        ws.description?.toLowerCase().includes(query)
+      )
+    }
+    
+    // Фильтрация по тегам
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter(ws =>
+        selectedTags.some(tag => ws.defaultTags.includes(tag))
+      )
+    }
+    
+    // Сортировка
+    filtered.sort((a, b) => {
+      let aValue: string | Date
+      let bValue: string | Date
+      
+      switch (sortBy) {
+        case 'name':
+          aValue = a.name
+          bValue = b.name
+          break
+        case 'created':
+          aValue = new Date(a.createdAt)
+          bValue = new Date(b.createdAt)
+          break
+        case 'updated':
+          aValue = new Date(a.updatedAt)
+          bValue = new Date(b.updatedAt)
+          break
+        default:
+          return 0
+      }
+      
+      if (sortOrder === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0
+      }
+    })
+    
+    return filtered
+  }, [currentWorkspaces, showPersonalOnly, showTeamOnly, searchQuery, selectedTags, sortBy, sortOrder])
+  
+  const allTags = React.useMemo(() => {
+    const tags = currentWorkspaces.flatMap(ws => ws.defaultTags)
+    return [...new Set(tags)].sort()
+  }, [currentWorkspaces])
 
   // Обработчики
   const handleCreateWorkspace = async (payload: CreateWorkspacePayload) => {
@@ -174,18 +232,18 @@ export const WorkspacesPage: React.FC = () => {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white p-4 rounded-lg shadow-sm border">
-            <div className="text-2xl font-bold text-blue-600">{workspaces.length}</div>
+            <div className="text-2xl font-bold text-blue-600">{currentWorkspaces.length}</div>
             <div className="text-sm text-slate-600">Всего пространств</div>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm border">
             <div className="text-2xl font-bold text-green-600">
-              {workspaces.filter(w => w.isPersonal).length}
+              {currentWorkspaces.filter(w => w.isPersonal).length}
             </div>
             <div className="text-sm text-slate-600">Личных</div>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm border">
             <div className="text-2xl font-bold text-purple-600">
-              {workspaces.filter(w => !w.isPersonal).length}
+              {currentWorkspaces.filter(w => !w.isPersonal).length}
             </div>
             <div className="text-sm text-slate-600">Командных</div>
           </div>

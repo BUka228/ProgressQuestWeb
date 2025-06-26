@@ -22,6 +22,20 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({
   const { data: workspacesData, isLoading } = useWorkspaces()
 
   const workspaces = workspacesData?.workspaces || []
+  
+  // Синхронизируем с store при получении данных из React Query
+  useEffect(() => {
+    if (workspacesData?.workspaces && workspacesData.workspaces.length > 0) {
+      // Если нет текущего workspace, выбираем первое личное
+      if (!currentWorkspace) {
+        const personalWorkspace = workspacesData.workspaces.find(ws => ws.isPersonal)
+        if (personalWorkspace) {
+          setCurrentWorkspace(personalWorkspace as any)
+        }
+      }
+    }
+  }, [workspacesData, currentWorkspace, setCurrentWorkspace])
+
   const activeWorkspace = currentWorkspace || workspaces.find(ws => ws.isPersonal)
 
   // Закрываем дропдаун при клике вне его
