@@ -38,7 +38,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const handleLogout = async () => {
     try {
       await logout()
-      navigate(ROUTES.HOME)
     } catch (error) {
       console.error('Logout error:', error)
     }

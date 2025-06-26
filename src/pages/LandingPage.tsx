@@ -468,32 +468,32 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Free Plan */}
-            <Card className="relative flex flex-col h-full">
-              <CardHeader className="bg-gray-50 rounded-t-lg">
+            <Card className="relative flex flex-col h-full bg-gray-800">
+              <CardHeader className="bg-gray-800 rounded-t-lg">
                 <CardTitle className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">Искатель</div>
-                  <div className="text-4xl font-bold text-indigo-600 mt-2">0 ₽</div>
-                  <div className="text-gray-600 font-medium">навсегда</div>
+                  <div className="text-2xl font-bold text-white">Искатель</div>
+                  <div className="text-4xl font-bold text-indigo-400 mt-2">0 ₽</div>
+                  <div className="text-gray-300 font-medium">навсегда</div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex-grow flex flex-col">
-                <p className="text-center text-gray-600 mb-6">Идеально для старта и личных задач</p>
+              <CardContent className="flex-grow flex flex-col bg-gray-800">
+                <p className="text-center text-gray-300 mb-6">Идеально для старта и личных задач</p>
                 <ul className="space-y-3 flex-grow">
                   <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Неограниченные личные задачи</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-200">Неограниченные личные задачи</span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Pomodoro-таймер</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-200">Pomodoro-таймер</span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Базовая геймификация</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-200">Базовая геймификация</span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">1 рабочее пространство</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-200">1 рабочее пространство</span>
                   </li>
                 </ul>
                 <div className="mt-auto pt-6">
@@ -508,43 +508,43 @@ export default function LandingPage() {
             </Card>
 
             {/* Pro Plan */}
-            <Card className="relative flex flex-col h-full border-2 border-indigo-500 shadow-xl">
+            <Card className="relative flex flex-col h-full border-2 border-indigo-500 shadow-xl bg-gray-800">
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                 <span className="bg-indigo-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
                   Популярный
                 </span>
               </div>
-              <CardHeader className="bg-indigo-50 rounded-t-lg pt-8">
+              <CardHeader className="bg-gray-800 rounded-t-lg pt-8">
                 <CardTitle className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">Герой</div>
-                  <div className="text-4xl font-bold text-indigo-600 mt-2">
+                  <div className="text-2xl font-bold text-white">Герой</div>
+                  <div className="text-4xl font-bold text-indigo-400 mt-2">
                     {isMonthly ? '299' : '239'} ₽
                   </div>
-                  <div className="text-gray-600 font-medium">{isMonthly ? 'в месяц' : 'в месяц (при годовой оплате)'}</div>
+                  <div className="text-gray-300 font-medium">{isMonthly ? 'в месяц' : 'в месяц (при годовой оплате)'}</div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex-grow flex flex-col">
-                <p className="text-center text-gray-600 mb-6">Для профессионалов, которым нужны все инструменты</p>
+              <CardContent className="flex-grow flex flex-col bg-gray-800">
+                <p className="text-center text-gray-300 mb-6">Для профессионалов, которым нужны все инструменты</p>
                 <ul className="space-y-3 flex-grow">
                   <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Все из "Искателя"</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-200">Все из "Искателя"</span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Неограниченные личные Workspace</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-200">Неограниченные личные Workspace</span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Продвинутая статистика и отчеты</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-200">Продвинутая статистика и отчеты</span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Пользовательские челленджи</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-200">Пользовательские челленджи</span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Интеграция с календарями</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-200">Интеграция с календарями</span>
                   </li>
                 </ul>
                 <div className="mt-auto pt-6">
@@ -559,42 +559,42 @@ export default function LandingPage() {
             </Card>
 
             {/* Team Plan */}
-            <Card className="relative flex flex-col h-full">
-              <CardHeader className="bg-purple-50 rounded-t-lg">
+            <Card className="relative flex flex-col h-full bg-gray-800">
+              <CardHeader className="bg-gray-800 rounded-t-lg">
                 <CardTitle className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">Гильдия</div>
-                  <div className="text-4xl font-bold text-purple-600 mt-2">
+                  <div className="text-2xl font-bold text-white">Гильдия</div>
+                  <div className="text-4xl font-bold text-purple-400 mt-2">
                     {isMonthly ? '249' : '199'} ₽
                   </div>
-                  <div className="text-gray-600 font-medium">за пользователя {isMonthly ? 'в месяц' : 'в месяц (при годовой оплате)'}</div>
+                  <div className="text-gray-300 font-medium">за пользователя {isMonthly ? 'в месяц' : 'в месяц (при годовой оплате)'}</div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex-grow flex flex-col">
-                <p className="text-center text-gray-600 mb-6">Для совместной работы и управления командой</p>
+              <CardContent className="flex-grow flex flex-col bg-gray-800">
+                <p className="text-center text-gray-300 mb-6">Для совместной работы и управления командой</p>
                 <ul className="space-y-3 flex-grow">
                   <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Все из "Героя"</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-200">Все из "Героя"</span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Командные Workspace</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-200">Командные Workspace</span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Управление ролями и доступом</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-200">Управление ролями и доступом</span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Общая Kanban-доска</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-200">Общая Kanban-доска</span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Командная аналитика</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-200">Командная аналитика</span>
                   </li>
                   <li className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">Приоритетная поддержка</span>
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-200">Приоритетная поддержка</span>
                   </li>
                 </ul>
                 <div className="mt-auto pt-6">
