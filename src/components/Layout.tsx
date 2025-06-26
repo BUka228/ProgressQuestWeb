@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAppStore } from '@/stores/appStore'
@@ -6,6 +6,7 @@ import { usePomodoroStore } from '@/stores/pomodoroStore'
 import { cn } from '@/utils/helpers'
 import { ROUTES } from '@/constants'
 import { DemoBanner } from './DemoBanner'
+import { CreateTaskModal } from './CreateTaskModal'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -26,6 +27,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { currentUser, logout } = useAuth()
   const { sidebarOpen, setSidebarOpen } = useAppStore()
   const { status, timeRemaining, sessionType, pauseTimer, resumeTimer, stopTimer } = usePomodoroStore()
+  const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false)
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -40,6 +42,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     } catch (error) {
       console.error('Logout error:', error)
     }
+  }
+
+  const handleCreateTask = (taskData: any) => {
+    // Здесь будет логика сохранения задачи
+    console.log('Создаётся задача:', taskData)
+    // TODO: Интеграция с backend/Firebase
   }
 
   return (
@@ -178,12 +186,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           
           <div className="flex items-center space-x-4">
             {/* Quick actions */}
-            <Link
-              to={ROUTES.TASKS}
-              className="px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            <button
+              onClick={() => setIsCreateTaskModalOpen(true)}
+              className="px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
               + Новая задача
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -203,6 +211,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           onClick={() => setSidebarOpen(false)}
         />
       )}
+
+      {/* Create Task Modal */}
+      <CreateTaskModal
+        isOpen={isCreateTaskModalOpen}
+        onClose={() => setIsCreateTaskModalOpen(false)}
+        onSubmit={handleCreateTask}
+      />
     </div>
   )
 }
