@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useCreateTask, useTasks } from '@/hooks/useTasks'
 import { TaskModal } from '@/components/TaskModal'
 import { TaskCard } from '@/components/TaskCard'
@@ -16,7 +16,6 @@ export const TasksPage = () => {
   const { currentUser } = useAuth() // <-- 3. ПОЛУЧАЕМ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ
 
   const handleCreateTask = (taskData: CreateTaskPayload) => {
-    // --- 4. ИСПРАВЛЕННАЯ ЛОГИКА ---
     if (!currentUser) {
       toast.error("Вы должны быть авторизованы, чтобы создавать задачи.");
       return;
@@ -27,12 +26,22 @@ export const TasksPage = () => {
        return;
     }
     
-    // Передаем объект правильной структуры
-    createTaskMutation.mutate({ userId: currentUser.uid, taskData });
-    // --- КОНЕЦ ИСПРАВЛЕНИЙ ---
+    // Конвертируем CreateTaskPayload в TaskCreateData
+    const taskCreateData = {
+      title: taskData.title,
+      description: taskData.description || undefined,
+      workspaceId: taskData.workspaceId,
+      priority: taskData.priority,
+      tags: taskData.tags,
+      dueDate: taskData.dueDate,
+      pomodoroEstimatedMinutes: taskData.pomodoroEstimatedMinutes,
+      approachParams: taskData.approachParams
+    };
+    
+    createTaskMutation.mutate({ userId: currentUser.uid, taskData: taskCreateData });
   }
 
-  const filteredTasks = tasksData?.tasks.filter(task => {
+  const filteredTasks = tasksData?.filter((task: TaskDocument) => {
     if (statusFilter === 'all') return true
     if (statusFilter === 'todo') return task.status === 'TODO'
     if (statusFilter === 'in_progress') return task.status === 'IN_PROGRESS'
@@ -63,7 +72,7 @@ export const TasksPage = () => {
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
-              Все ({tasksData?.tasks.length || 0})
+              Все ({tasksData?.length || 0})
             </button>
             <button 
               onClick={() => setStatusFilter('todo')}
@@ -73,7 +82,7 @@ export const TasksPage = () => {
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
-              📋 К выполнению ({tasksData?.tasks.filter(t => t.status === 'TODO').length || 0})
+              📋 К выполнению ({tasksData?.filter((t: TaskDocument) => t.status === 'TODO').length || 0})
             </button>
             <button 
               onClick={() => setStatusFilter('in_progress')}
@@ -83,7 +92,7 @@ export const TasksPage = () => {
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
-              ⚡ В работе ({tasksData?.tasks.filter(t => t.status === 'IN_PROGRESS').length || 0})
+              ⚡ В работе ({tasksData?.filter((t: TaskDocument) => t.status === 'IN_PROGRESS').length || 0})
             </button>
             <button 
               onClick={() => setStatusFilter('done')}
@@ -93,7 +102,7 @@ export const TasksPage = () => {
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
-              ✅ Выполнено ({tasksData?.tasks.filter(t => t.status === 'DONE').length || 0})
+              ✅ Выполнено ({tasksData?.filter((t: TaskDocument) => t.status === 'DONE').length || 0})
             </button>
           </div>
 
@@ -101,7 +110,7 @@ export const TasksPage = () => {
             <p className="text-center py-12">Загружаем задачи...</p>
           ) : error ? (
             <p className="text-center py-12 text-red-600">Ошибка загрузки задач</p>
-          ) : tasksData?.tasks.length === 0 ? (
+          ) : tasksData?.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">📝</div>
               <p className="text-slate-500 text-lg">Задач пока нет</p>

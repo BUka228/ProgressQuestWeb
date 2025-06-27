@@ -10,12 +10,28 @@ import {
   GetTasksResponse,
   CreateTaskResponse,
   UpdateTaskResponse,
-  DeleteTaskResponse,
-  UpdateTaskStatusPayload,
-  SuccessResponse,
-  GetTaskDetailsPayload,
-  GetTaskDetailsResponse
+  DeleteTaskResponse
 } from '@/types/task.types'
+
+// Дополнительные типы для совместимости
+export interface UpdateTaskStatusPayload {
+  taskId: string
+  newStatus: TaskStatusType
+  workspaceId: string
+}
+
+export interface SuccessResponse {
+  success: boolean
+  message?: string
+}
+
+export interface GetTaskDetailsPayload {
+  taskId: string
+}
+
+export interface GetTaskDetailsResponse {
+  task: TaskDocument
+}
 
 // Cloud Functions
 const createTaskFn = httpsCallable<CreateTaskPayload, CreateTaskResponse>(functions, 'createTask')
@@ -46,8 +62,8 @@ export interface TaskCreateData {
   workspaceId: string
   priority?: TaskPriorityType
   tags?: string[]
-  dueDate?: string
-  pomodoroEstimatedMinutes?: number
+  dueDate?: string | null
+  pomodoroEstimatedMinutes?: number | null
   approachParams?: {
     calendar?: {
       eventId: string | null
@@ -74,7 +90,7 @@ export interface TaskCreateData {
 export class TaskService {
   // Создание новой задачи
   static async createTask(
-    userId: string,
+    _userId: string,
     taskData: TaskCreateData
   ): Promise<TaskDocument> {
     try {
@@ -201,7 +217,7 @@ export class TaskService {
   }
 
   // Получение статистики задач (заглушка для совместимости)
-  static async getTasksStats(userId: string, workspaceId?: string): Promise<{
+  static async getTasksStats(_userId: string, workspaceId?: string): Promise<{
     total: number
     completed: number
     inProgress: number
@@ -231,19 +247,19 @@ export class TaskService {
 
   // === DEPRECATED METHODS (для совместимости) ===
   
-  static async archiveTask(taskId: string, isArchived: boolean): Promise<void> {
+  static async archiveTask(_taskId: string, _isArchived: boolean): Promise<void> {
     console.warn('archiveTask is deprecated and not implemented with Cloud Functions')
   }
 
-  static async addComment(taskId: string, userId: string, content: string): Promise<void> {
+  static async addComment(_taskId: string, _userId: string, _content: string): Promise<void> {
     console.warn('addComment is deprecated. Use subtasks/comments Cloud Functions instead')
   }
 
-  static async incrementPomodoroCount(taskId: string): Promise<void> {
+  static async incrementPomodoroCount(_taskId: string): Promise<void> {
     console.warn('incrementPomodoroCount is deprecated. Use pomodoro Cloud Functions instead')
   }
 
-  static async bulkUpdateTasks(updates: Array<{ id: string; data: Partial<any> }>): Promise<void> {
+  static async bulkUpdateTasks(_updates: Array<{ id: string; data: Partial<any> }>): Promise<void> {
     console.warn('bulkUpdateTasks is not implemented with Cloud Functions')
   }
 }

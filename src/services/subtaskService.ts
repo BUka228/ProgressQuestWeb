@@ -70,9 +70,9 @@ export class SubtaskService {
 
   // Обновление подзадачи (заглушка для будущего расширения)
   static async updateSubtask(
-    parentTaskId: string, 
-    subtaskId: string, 
-    updates: Partial<{ title: string; completed: boolean; order: number }>
+    _parentTaskId: string, 
+    _subtaskId: string, 
+    _updates: Partial<{ title: string; completed: boolean; order: number }>
   ): Promise<void> {
     console.warn('updateSubtask is not implemented yet')
     throw new Error('updateSubtask is not implemented yet')

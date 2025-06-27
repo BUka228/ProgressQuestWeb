@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { TaskDocument, TaskStatusType, TaskPriorityType } from '@/types/task.types'
-import { useUpdateTask, useDeleteTask, useUpdateTaskStatus } from '@/hooks/useTasks'
+import { useDeleteTask, useUpdateTaskStatus } from '@/hooks/useTasks'
 import { toast } from 'sonner'
 
 interface TaskCardProps {
@@ -21,7 +21,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   workspaceId,
 }) => {
   const [showDropdown, setShowDropdown] = useState(false)
-  const updateTaskMutation = useUpdateTask()
   const deleteTaskMutation = useDeleteTask()
   const updateStatusMutation = useUpdateTaskStatus()
 

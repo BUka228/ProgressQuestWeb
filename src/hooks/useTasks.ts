@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { TaskService, TaskFilters, TaskCreateData } from '@/services/taskService'
 import { UserService } from '@/services/userService'
-import { TaskDocument, TaskStatusType } from '@/types/task.types'
+import { TaskStatusType } from '@/types/task.types'
 import { toast } from 'sonner'
 import { SUCCESS_MESSAGES, GAMIFICATION } from '@/constants'
 
@@ -24,7 +24,7 @@ export function useTasks(
   sortDirection?: 'asc' | 'desc'
 ) {
   return useQuery({
-    queryKey: TASK_KEYS.list({ workspaceId, viewId, ...filters }),
+    queryKey: TASK_KEYS.list({ workspaceId, ...filters }),
     queryFn: () => TaskService.getTasks(workspaceId, viewId, filters, sortBy, sortDirection),
     staleTime: 5 * 60 * 1000, // 5 minutes
     enabled: !!workspaceId || !!viewId

@@ -136,6 +136,7 @@ export interface TaskFilters {
   dueDateRange?: {
     start: string | null;
     end: string | null;
+    type?: 'due' | 'created' | 'updated';
   } | null;
 }
 
