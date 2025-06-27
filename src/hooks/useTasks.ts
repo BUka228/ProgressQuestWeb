@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { TaskService, TaskFilters, TaskCreateData } from '@/services/taskService'
 import { UserService } from '@/services/userService'
-import { Task, TaskStatus } from '@/types'
+import { TaskDocument, TaskStatusType } from '@/types/task.types'
 import { toast } from 'sonner'
 import { SUCCESS_MESSAGES, GAMIFICATION } from '@/constants'
 
@@ -16,11 +16,18 @@ export const TASK_KEYS = {
 }
 
 // Get tasks with filters
-export function useTasks(filters: TaskFilters = {}, pageSize: number = 20) {
+export function useTasks(
+  workspaceId?: string,
+  viewId?: string, 
+  filters: TaskFilters = {}, 
+  sortBy?: string,
+  sortDirection?: 'asc' | 'desc'
+) {
   return useQuery({
-    queryKey: TASK_KEYS.list(filters),
-    queryFn: () => TaskService.getTasks(filters, pageSize),
+    queryKey: TASK_KEYS.list({ workspaceId, viewId, ...filters }),
+    queryFn: () => TaskService.getTasks(workspaceId, viewId, filters, sortBy, sortDirection),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!workspaceId || !!viewId
   })
 }
 
@@ -66,7 +73,7 @@ export function useUpdateTask() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ taskId, updates }: { taskId: string; updates: Partial<Task> }) =>
+    mutationFn: ({ taskId, updates }: { taskId: string; updates: Partial<TaskCreateData> }) =>
       TaskService.updateTask(taskId, updates),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.detail(variables.taskId) })
@@ -87,16 +94,18 @@ export function useUpdateTaskStatus() {
     mutationFn: async ({ 
       taskId, 
       status, 
+      workspaceId,
       userId 
     }: { 
       taskId: string; 
-      status: TaskStatus; 
+      status: TaskStatusType; 
+      workspaceId: string;
       userId: string 
     }) => {
-      await TaskService.updateTaskStatus(taskId, status)
+      await TaskService.updateTaskStatus(taskId, status, workspaceId)
       
       // Award XP for completing tasks
-      if (status === 'done') {
+      if (status === 'DONE') {
         await UserService.addXP(userId, GAMIFICATION.XP_PER_TASK)
         await UserService.incrementTaskCount(userId)
       }
@@ -106,7 +115,7 @@ export function useUpdateTaskStatus() {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.lists() })
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.stats(variables.userId) })
       
-      if (variables.status === 'done') {
+      if (variables.status === 'DONE') {
         toast.success('Задача выполнена! +' + GAMIFICATION.XP_PER_TASK + ' XP')
       } else {
         toast.success(SUCCESS_MESSAGES.TASK_UPDATED)

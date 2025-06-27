@@ -11,7 +11,7 @@ export const TasksPage = () => {
   const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const { currentWorkspace } = useWorkspaceStore()
-  const { data: tasksData, isLoading, error } = useTasks()
+  const { data: tasksData, isLoading, error } = useTasks(currentWorkspace?.id)
   const createTaskMutation = useCreateTask()
   const { currentUser } = useAuth() // <-- 3. ПОЛУЧАЕМ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ
 
@@ -122,7 +122,13 @@ export const TasksPage = () => {
           ) : (
             <div>
               {filteredTasks.map((task: TaskDocument) => (
-                <TaskCard key={task.id} task={task} variant="default" />
+                <TaskCard 
+                  key={task.id} 
+                  task={task} 
+                  variant="default"
+                  userId={currentUser?.uid}
+                  workspaceId={currentWorkspace?.id}
+                />
               ))}
             </div>
           )}

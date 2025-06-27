@@ -311,6 +311,7 @@ merged_ts_files.txt
 FIREBASE_SETUP_REAL.md
 =======
 >>>>>>> 1802feae3115fba0accaa8969680cbcbe6469ed0
+client_bundle.txt
 
 
 --- bundle_client_files.py ---
@@ -7819,6 +7820,10 @@ export default defineConfig({
 }
 
 
+--- functions/lib/index.js.map ---
+
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../src/index.ts"],"names":[],"mappings":"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"}
+
 --- functions/src/index.ts ---
 
 import * as functions from "firebase-functions";
@@ -9181,12 +9186,16 @@ interface TaskCardProps {
   task: TaskDocument
   onEdit?: (task: TaskDocument) => void
   variant?: 'default' | 'compact' | 'detailed'
+  userId?: string
+  workspaceId?: string
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({
   task,
   onEdit,
   variant = 'default',
+  userId,
+  workspaceId,
 }) => {
   const [showDropdown, setShowDropdown] = useState(false)
   const updateTaskMutation = useUpdateTask()
@@ -9241,7 +9250,17 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   }
 
   const handleStatusChange = (newStatus: TaskStatusType) => {
-    updateStatusMutation.mutate({ taskId: task.id, status: newStatus })
+    if (!userId || !workspaceId) {
+      toast.error('Не удалось обновить статус: недостаточно данных')
+      return
+    }
+    
+    updateStatusMutation.mutate({ 
+      taskId: task.id, 
+      status: newStatus, 
+      userId,
+      workspaceId 
+    })
     setShowDropdown(false)
   }
 
@@ -11663,7 +11682,7 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { TaskService, TaskFilters, TaskCreateData } from '@/services/taskService'
 import { UserService } from '@/services/userService'
-import { Task, TaskStatus } from '@/types'
+import { TaskDocument, TaskStatusType } from '@/types/task.types'
 import { toast } from 'sonner'
 import { SUCCESS_MESSAGES, GAMIFICATION } from '@/constants'
 
@@ -11678,11 +11697,18 @@ export const TASK_KEYS = {
 }
 
 // Get tasks with filters
-export function useTasks(filters: TaskFilters = {}, pageSize: number = 20) {
+export function useTasks(
+  workspaceId?: string,
+  viewId?: string, 
+  filters: TaskFilters = {}, 
+  sortBy?: string,
+  sortDirection?: 'asc' | 'desc'
+) {
   return useQuery({
-    queryKey: TASK_KEYS.list(filters),
-    queryFn: () => TaskService.getTasks(filters, pageSize),
+    queryKey: TASK_KEYS.list({ workspaceId, viewId, ...filters }),
+    queryFn: () => TaskService.getTasks(workspaceId, viewId, filters, sortBy, sortDirection),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!workspaceId || !!viewId
   })
 }
 
@@ -11728,7 +11754,7 @@ export function useUpdateTask() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ taskId, updates }: { taskId: string; updates: Partial<Task> }) =>
+    mutationFn: ({ taskId, updates }: { taskId: string; updates: Partial<TaskCreateData> }) =>
       TaskService.updateTask(taskId, updates),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.detail(variables.taskId) })
@@ -11749,16 +11775,18 @@ export function useUpdateTaskStatus() {
     mutationFn: async ({ 
       taskId, 
       status, 
+      workspaceId,
       userId 
     }: { 
       taskId: string; 
-      status: TaskStatus; 
+      status: TaskStatusType; 
+      workspaceId: string;
       userId: string 
     }) => {
-      await TaskService.updateTaskStatus(taskId, status)
+      await TaskService.updateTaskStatus(taskId, status, workspaceId)
       
       // Award XP for completing tasks
-      if (status === 'done') {
+      if (status === 'DONE') {
         await UserService.addXP(userId, GAMIFICATION.XP_PER_TASK)
         await UserService.incrementTaskCount(userId)
       }
@@ -11768,7 +11796,7 @@ export function useUpdateTaskStatus() {
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.lists() })
       queryClient.invalidateQueries({ queryKey: TASK_KEYS.stats(variables.userId) })
       
-      if (variables.status === 'done') {
+      if (variables.status === 'DONE') {
         toast.success('Задача выполнена! +' + GAMIFICATION.XP_PER_TASK + ' XP')
       } else {
         toast.success(SUCCESS_MESSAGES.TASK_UPDATED)
@@ -13992,7 +14020,7 @@ export const TasksPage = () => {
   const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const { currentWorkspace } = useWorkspaceStore()
-  const { data: tasksData, isLoading, error } = useTasks()
+  const { data: tasksData, isLoading, error } = useTasks(currentWorkspace?.id)
   const createTaskMutation = useCreateTask()
   const { currentUser } = useAuth() // <-- 3. ПОЛУЧАЕМ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ
 
@@ -14103,7 +14131,13 @@ export const TasksPage = () => {
           ) : (
             <div>
               {filteredTasks.map((task: TaskDocument) => (
-                <TaskCard key={task.id} task={task} variant="default" />
+                <TaskCard 
+                  key={task.id} 
+                  task={task} 
+                  variant="default"
+                  userId={currentUser?.uid}
+                  workspaceId={currentWorkspace?.id}
+                />
               ))}
             </div>
           )}
@@ -14596,329 +14630,295 @@ export function handleFirebaseError(error: any): string {
 }
 
 
+--- src/services/subtaskService.ts ---
+
+import { httpsCallable } from 'firebase/functions'
+import { functions } from '@/lib/firebase'
+
+export interface SubtaskDocument {
+  id: string
+  title: string
+  completed: boolean
+  order: number
+  createdAt: string
+}
+
+export interface CreateSubtaskPayload {
+  parentTaskId: string
+  title: string
+}
+
+export interface UpdateSubtaskPayload {
+  parentTaskId: string
+  subtaskId: string
+  title?: string
+  completed?: boolean
+  order?: number
+}
+
+export interface DeleteSubtaskPayload {
+  parentTaskId: string
+  subtaskId: string
+}
+
+export interface SuccessResponse {
+  success: boolean
+  message?: string
+}
+
+// Cloud Functions
+const addSubtaskFn = httpsCallable<CreateSubtaskPayload, SubtaskDocument>(functions, 'addSubtask')
+const deleteSubtaskFn = httpsCallable<DeleteSubtaskPayload, SuccessResponse>(functions, 'deleteSubtask')
+
+export class SubtaskService {
+  // Создание подзадачи
+  static async createSubtask(parentTaskId: string, title: string): Promise<SubtaskDocument> {
+    try {
+      const payload: CreateSubtaskPayload = {
+        parentTaskId,
+        title
+      }
+
+      const result = await addSubtaskFn(payload)
+      return result.data
+    } catch (error: any) {
+      console.error('Error creating subtask:', error)
+      throw new Error(error.message || 'Failed to create subtask')
+    }
+  }
+
+  // Удаление подзадачи
+  static async deleteSubtask(parentTaskId: string, subtaskId: string): Promise<void> {
+    try {
+      const payload: DeleteSubtaskPayload = {
+        parentTaskId,
+        subtaskId
+      }
+
+      await deleteSubtaskFn(payload)
+    } catch (error: any) {
+      console.error('Error deleting subtask:', error)
+      throw new Error(error.message || 'Failed to delete subtask')
+    }
+  }
+
+  // Обновление подзадачи (заглушка для будущего расширения)
+  static async updateSubtask(
+    parentTaskId: string, 
+    subtaskId: string, 
+    updates: Partial<{ title: string; completed: boolean; order: number }>
+  ): Promise<void> {
+    console.warn('updateSubtask is not implemented yet')
+    throw new Error('updateSubtask is not implemented yet')
+  }
+}
+
+
 --- src/services/taskService.ts ---
 
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  limit,
-  startAfter,
-  serverTimestamp,
-  writeBatch,
-} from 'firebase/firestore'
-import { db } from '@/lib/firebase'
-import { Task, TaskStatus, TaskPriority, PaginatedResponse } from '@/types'
-import { handleFirebaseError } from './firebase'
-import { generateId } from '@/utils/helpers'
+import { httpsCallable } from 'firebase/functions'
+import { functions } from '@/lib/firebase'
+import { 
+  TaskDocument, 
+  TaskStatusType, 
+  TaskPriorityType, 
+  CreateTaskPayload,
+  UpdateTaskPayload,
+  TaskFilters as TaskFiltersType,
+  GetTasksResponse,
+  CreateTaskResponse,
+  UpdateTaskResponse,
+  DeleteTaskResponse,
+  UpdateTaskStatusPayload,
+  SuccessResponse,
+  GetTaskDetailsPayload,
+  GetTaskDetailsResponse
+} from '@/types/task.types'
 
-const TASKS_COLLECTION = 'tasks'
+// Cloud Functions
+const createTaskFn = httpsCallable<CreateTaskPayload, CreateTaskResponse>(functions, 'createTask')
+const getTasksFn = httpsCallable<{ workspaceId?: string; viewId?: string; filters?: TaskFiltersType; sortBy?: string; sortDirection?: 'asc' | 'desc' }, GetTasksResponse>(functions, 'getTasks')
+const getTaskDetailsFn = httpsCallable<GetTaskDetailsPayload, GetTaskDetailsResponse>(functions, 'getTaskDetails')
+const updateTaskFn = httpsCallable<UpdateTaskPayload, UpdateTaskResponse>(functions, 'updateTask')
+const updateTaskStatusFn = httpsCallable<UpdateTaskStatusPayload, SuccessResponse>(functions, 'updateTaskStatus')
+const deleteTaskFn = httpsCallable<{ taskId: string }, DeleteTaskResponse>(functions, 'deleteTask')
 
+// Локальные интерфейсы для совместимости со старым кодом
 export interface TaskFilters {
   workspaceId?: string
-  projectId?: string
-  assigneeId?: string
-  status?: TaskStatus
-  priority?: TaskPriority
-  tags?: string[]
-  dueDate?: Date
-  isArchived?: boolean
+  status?: TaskStatusType[]
+  priority?: TaskPriorityType[]
+  tagsInclude?: string[]
+  tagsExclude?: string[]
+  assignee?: 'me' | 'unassigned' | string | null
+  search?: string
+  dueDateRange?: {
+    start: string | null
+    end: string | null
+  } | null
 }
 
 export interface TaskCreateData {
   title: string
   description?: string
   workspaceId: string
-  projectId?: string
-  assigneeId?: string
-  priority: TaskPriority
+  priority?: TaskPriorityType
   tags?: string[]
-  dueDate?: Date
-  estimatedDuration?: number
-  parentId?: string
+  dueDate?: string
+  pomodoroEstimatedMinutes?: number
+  approachParams?: {
+    calendar?: {
+      eventId: string | null
+      isAllDay: boolean
+      recurrenceRule: string | null
+    }
+    gtd?: {
+      context: string | null
+      nextAction: boolean
+      projectLink: string | null
+      waitingFor: string | null
+    }
+    eisenhower?: {
+      urgency: number
+      importance: number
+    }
+    frog?: {
+      isFrog: boolean
+      difficulty: 'EASY' | 'MEDIUM' | 'HARD'
+    }
+  } | null
 }
 
 export class TaskService {
-  // Create a new task
+  // Создание новой задачи
   static async createTask(
     userId: string,
     taskData: TaskCreateData
-  ): Promise<string> {
+  ): Promise<TaskDocument> {
     try {
-      const taskRef = collection(db, TASKS_COLLECTION)
-      
-      const task: any = {
+      const payload: CreateTaskPayload = {
         title: taskData.title,
+        description: taskData.description || null,
         workspaceId: taskData.workspaceId,
-        createdById: userId,
-        status: 'TODO',
-        priority: taskData.priority,
+        priority: taskData.priority || 'MEDIUM',
         tags: taskData.tags || [],
-        pomodoroCount: 0,
-        attachments: [],
-        comments: [],
-        dependencies: [],
-        customFields: {},
-        isArchived: false,
+        dueDate: taskData.dueDate || null,
+        pomodoroEstimatedMinutes: taskData.pomodoroEstimatedMinutes || null,
+        approachParams: taskData.approachParams || null
       }
 
-      if (taskData.description !== undefined) task.description = taskData.description
-      if (taskData.projectId !== undefined) task.projectId = taskData.projectId
-      if (taskData.assigneeId !== undefined) task.assigneeId = taskData.assigneeId
-      // --- ИСПРАВЛЕНО ЗДЕСЬ ---
-      if (taskData.parentId !== undefined) task.parentId = taskData.parentId
-      // ------------------------
-      if (taskData.dueDate) task.dueDate = new Date(taskData.dueDate)
-      if (taskData.estimatedDuration !== undefined) task.estimatedDuration = taskData.estimatedDuration
-
-      const docRef = await addDoc(taskRef, {
-        ...task,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      })
-
-      return docRef.id
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
+      const result = await createTaskFn(payload)
+      return result.data.task
+    } catch (error: any) {
+      console.error('Error creating task:', error)
+      throw new Error(error.message || 'Failed to create task')
     }
   }
 
-  // Get task by ID
-  static async getTask(taskId: string): Promise<Task | null> {
+  // Получение задачи по ID
+  static async getTask(taskId: string): Promise<TaskDocument | null> {
     try {
-      const taskRef = doc(db, TASKS_COLLECTION, taskId)
-      const taskSnap = await getDoc(taskRef)
-      
-      if (taskSnap.exists()) {
-        const data = taskSnap.data()
-        return {
-          id: taskSnap.id,
-          ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date(),
-          dueDate: data.dueDate?.toDate(),
-          completedAt: data.completedAt?.toDate(),
-        } as Task
+      const result = await getTaskDetailsFn({ taskId })
+      return result.data.task
+    } catch (error: any) {
+      console.error('Error getting task:', error)
+      if (error.code === 'functions/not-found') {
+        return null
       }
-      
-      return null
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
+      throw new Error(error.message || 'Failed to get task')
     }
   }
 
-  // Get tasks with filters and pagination
+  // Получение списка задач с фильтрами
   static async getTasks(
-    filters: TaskFilters = {},
-    pageSize: number = 20,
-    lastDoc?: any
-  ): Promise<PaginatedResponse<Task>> {
+    workspaceId?: string,
+    viewId?: string,
+    filters?: TaskFilters,
+    sortBy?: string,
+    sortDirection?: 'asc' | 'desc'
+  ): Promise<TaskDocument[]> {
     try {
-      let q = query(collection(db, TASKS_COLLECTION))
-
-      // Apply filters
-      if (filters.workspaceId) {
-        q = query(q, where('workspaceId', '==', filters.workspaceId))
-      }
-      if (filters.projectId) {
-        q = query(q, where('projectId', '==', filters.projectId))
-      }
-      if (filters.assigneeId) {
-        q = query(q, where('assigneeId', '==', filters.assigneeId))
-      }
-      if (filters.status) {
-        q = query(q, where('status', '==', filters.status))
-      }
-      if (filters.priority) {
-        q = query(q, where('priority', '==', filters.priority))
-      }
-      if (filters.isArchived !== undefined) {
-        q = query(q, where('isArchived', '==', filters.isArchived))
+      const payload = {
+        workspaceId,
+        viewId,
+        filters: filters ? {
+          status: filters.status,
+          priority: filters.priority,
+          tagsInclude: filters.tagsInclude,
+          tagsExclude: filters.tagsExclude,
+          assignee: filters.assignee,
+          search: filters.search,
+          dueDateRange: filters.dueDateRange ? {
+            start: filters.dueDateRange.start,
+            end: filters.dueDateRange.end,
+            type: 'due' as const
+          } : null
+        } as TaskFiltersType : undefined,
+        sortBy,
+        sortDirection
       }
 
-      // Order by creation date (newest first)
-      q = query(q, orderBy('createdAt', 'desc'))
-
-      // Pagination
-      if (lastDoc) {
-        q = query(q, startAfter(lastDoc))
-      }
-      q = query(q, limit(pageSize + 1)) // Get one extra to check if there are more
-
-      const querySnapshot = await getDocs(q)
-      const tasks: Task[] = []
-      const docs = querySnapshot.docs
-
-      docs.slice(0, pageSize).forEach((doc) => {
-        const data = doc.data()
-        tasks.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date(),
-          dueDate: data.dueDate?.toDate(),
-          completedAt: data.completedAt?.toDate(),
-        } as Task)
-      })
-
-      const hasNext = docs.length > pageSize
-      const hasPrev = !!lastDoc
-
-      return {
-        items: tasks,
-        total: tasks.length, // Note: Firestore doesn't provide total count efficiently
-        page: 1, // We don't track page numbers with cursor pagination
-        limit: pageSize,
-        hasNext,
-        hasPrev,
-      }
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
+      const result = await getTasksFn(payload)
+      return result.data.tasks
+    } catch (error: any) {
+      console.error('Error getting tasks:', error)
+      throw new Error(error.message || 'Failed to get tasks')
     }
   }
 
-  // Update task
-  static async updateTask(taskId: string, updates: Partial<Task>): Promise<void> {
+  // Обновление задачи
+  static async updateTask(taskId: string, updates: Partial<TaskCreateData>): Promise<TaskDocument> {
     try {
-      const taskRef = doc(db, TASKS_COLLECTION, taskId)
-      // Убираем undefined поля из updates
-      const cleanUpdates: any = {}
-      Object.keys(updates).forEach(key => {
-        if (updates[key as keyof Task] !== undefined) {
-          cleanUpdates[key] = updates[key as keyof Task]
-        }
-      })
-      
-      await updateDoc(taskRef, {
-        ...cleanUpdates,
-        updatedAt: serverTimestamp(),
-      })
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
+      const payload: UpdateTaskPayload = {
+        taskId,
+        title: updates.title,
+        description: updates.description,
+        priority: updates.priority,
+        dueDate: updates.dueDate,
+        tags: updates.tags,
+        pomodoroEstimatedMinutes: updates.pomodoroEstimatedMinutes,
+        approachParams: updates.approachParams
+      }
+
+      const result = await updateTaskFn(payload)
+      return result.data.task
+    } catch (error: any) {
+      console.error('Error updating task:', error)
+      throw new Error(error.message || 'Failed to update task')
     }
   }
 
-  // Update task status
-  static async updateTaskStatus(taskId: string, status: TaskStatus): Promise<void> {
+  // Обновление статуса задачи
+  static async updateTaskStatus(
+    taskId: string, 
+    status: TaskStatusType, 
+    workspaceId: string
+  ): Promise<void> {
     try {
-      const taskRef = doc(db, TASKS_COLLECTION, taskId)
-      const updates: any = {
-        status,
-        updatedAt: serverTimestamp(),
+      const payload: UpdateTaskStatusPayload = {
+        taskId,
+        newStatus: status,
+        workspaceId
       }
 
-      if (status === 'done') {
-        updates.completedAt = serverTimestamp()
-      }
-
-      await updateDoc(taskRef, updates)
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
+      await updateTaskStatusFn(payload)
+    } catch (error: any) {
+      console.error('Error updating task status:', error)
+      throw new Error(error.message || 'Failed to update task status')
     }
   }
 
-  // Delete task
+  // Удаление задачи
   static async deleteTask(taskId: string): Promise<void> {
     try {
-      const taskRef = doc(db, TASKS_COLLECTION, taskId)
-      await deleteDoc(taskRef)
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
+      await deleteTaskFn({ taskId })
+    } catch (error: any) {
+      console.error('Error deleting task:', error)
+      throw new Error(error.message || 'Failed to delete task')
     }
   }
 
-  // Archive/Unarchive task
-  static async archiveTask(taskId: string, isArchived: boolean): Promise<void> {
-    try {
-      const taskRef = doc(db, TASKS_COLLECTION, taskId)
-      await updateDoc(taskRef, {
-        isArchived,
-        updatedAt: serverTimestamp(),
-      })
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
-    }
-  }
-
-  // Add comment to task
-  static async addComment(
-    taskId: string,
-    userId: string,
-    content: string
-  ): Promise<void> {
-    try {
-      const taskRef = doc(db, TASKS_COLLECTION, taskId)
-      const task = await this.getTask(taskId)
-      
-      if (!task) throw new Error('Task not found')
-
-      const newComment = {
-        id: generateId(),
-        content,
-        authorId: userId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isEdited: false,
-        mentions: [], // TODO: Extract mentions from content
-      }
-
-      const updatedComments = [...task.comments, newComment]
-
-      await updateDoc(taskRef, {
-        comments: updatedComments,
-        updatedAt: serverTimestamp(),
-      })
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
-    }
-  }
-
-  // Increment pomodoro count
-  static async incrementPomodoroCount(taskId: string): Promise<void> {
-    try {
-      const taskRef = doc(db, TASKS_COLLECTION, taskId)
-      const task = await this.getTask(taskId)
-      
-      if (!task) throw new Error('Task not found')
-
-      await updateDoc(taskRef, {
-        pomodoroCount: task.pomodoroCount + 1,
-        updatedAt: serverTimestamp(),
-      })
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
-    }
-  }
-
-  // Bulk update tasks
-  static async bulkUpdateTasks(
-    updates: Array<{ id: string; data: Partial<Task> }>
-  ): Promise<void> {
-    try {
-      const batch = writeBatch(db)
-
-      updates.forEach(({ id, data }) => {
-        const taskRef = doc(db, TASKS_COLLECTION, id)
-        batch.update(taskRef, {
-          ...data,
-          updatedAt: serverTimestamp(),
-        })
-      })
-
-      await batch.commit()
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
-    }
-  }
-
-  // Get user's tasks statistics
+  // Получение статистики задач (заглушка для совместимости)
   static async getTasksStats(userId: string, workspaceId?: string): Promise<{
     total: number
     completed: number
@@ -14926,51 +14926,43 @@ export class TaskService {
     overdue: number
   }> {
     try {
-      const filters: TaskFilters = { isArchived: false }
-      if (workspaceId) filters.workspaceId = workspaceId
+      const tasks = await this.getTasks(workspaceId)
       
-      // Get user's assigned tasks
-      const assignedTasks = await this.getTasks({ ...filters, assigneeId: userId }, 1000)
-      
-      // Get tasks created by user
-      const createdQuery = query(
-        collection(db, TASKS_COLLECTION),
-        where('createdById', '==', userId),
-        where('isArchived', '==', false)
-      )
-      const createdSnapshot = await getDocs(createdQuery)
-      
-      const allTasks = [
-        ...assignedTasks.items,
-        ...createdSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate() || new Date(),
-          updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-          dueDate: doc.data().dueDate?.toDate(),
-          completedAt: doc.data().completedAt?.toDate(),
-        } as Task))
-      ]
-
-      // Remove duplicates
-      const uniqueTasks = allTasks.filter((task, index, self) => 
-        index === self.findIndex(t => t.id === task.id)
-      )
-
       const now = new Date()
       const stats = {
-        total: uniqueTasks.length,
-        completed: uniqueTasks.filter(task => task.status === 'done').length,
-        inProgress: uniqueTasks.filter(task => task.status === 'in_progress').length,
-        overdue: uniqueTasks.filter(task => 
-          task.dueDate && task.dueDate < now && task.status !== 'done'
-        ).length,
+        total: tasks.length,
+        completed: tasks.filter(task => task.status === 'DONE').length,
+        inProgress: tasks.filter(task => task.status === 'IN_PROGRESS').length,
+        overdue: tasks.filter(task => {
+          if (!task.dueDate || task.status === 'DONE') return false
+          const dueDate = new Date(task.dueDate)
+          return dueDate < now
+        }).length,
       }
 
       return stats
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
+    } catch (error: any) {
+      console.error('Error getting task stats:', error)
+      throw new Error(error.message || 'Failed to get task stats')
     }
+  }
+
+  // === DEPRECATED METHODS (для совместимости) ===
+  
+  static async archiveTask(taskId: string, isArchived: boolean): Promise<void> {
+    console.warn('archiveTask is deprecated and not implemented with Cloud Functions')
+  }
+
+  static async addComment(taskId: string, userId: string, content: string): Promise<void> {
+    console.warn('addComment is deprecated. Use subtasks/comments Cloud Functions instead')
+  }
+
+  static async incrementPomodoroCount(taskId: string): Promise<void> {
+    console.warn('incrementPomodoroCount is deprecated. Use pomodoro Cloud Functions instead')
+  }
+
+  static async bulkUpdateTasks(updates: Array<{ id: string; data: Partial<any> }>): Promise<void> {
+    console.warn('bulkUpdateTasks is not implemented with Cloud Functions')
   }
 }
 

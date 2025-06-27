@@ -9,12 +9,16 @@ interface TaskCardProps {
   task: TaskDocument
   onEdit?: (task: TaskDocument) => void
   variant?: 'default' | 'compact' | 'detailed'
+  userId?: string
+  workspaceId?: string
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({
   task,
   onEdit,
   variant = 'default',
+  userId,
+  workspaceId,
 }) => {
   const [showDropdown, setShowDropdown] = useState(false)
   const updateTaskMutation = useUpdateTask()
@@ -69,7 +73,17 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   }
 
   const handleStatusChange = (newStatus: TaskStatusType) => {
-    updateStatusMutation.mutate({ taskId: task.id, status: newStatus })
+    if (!userId || !workspaceId) {
+      toast.error('Не удалось обновить статус: недостаточно данных')
+      return
+    }
+    
+    updateStatusMutation.mutate({ 
+      taskId: task.id, 
+      status: newStatus, 
+      userId,
+      workspaceId 
+    })
     setShowDropdown(false)
   }
 

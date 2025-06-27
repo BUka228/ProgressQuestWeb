@@ -1,324 +1,206 @@
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  limit,
-  startAfter,
-  serverTimestamp,
-  writeBatch,
-} from 'firebase/firestore'
-import { db } from '@/lib/firebase'
-import { Task, TaskStatus, TaskPriority, PaginatedResponse } from '@/types'
-import { handleFirebaseError } from './firebase'
-import { generateId } from '@/utils/helpers'
+import { httpsCallable } from 'firebase/functions'
+import { functions } from '@/lib/firebase'
+import { 
+  TaskDocument, 
+  TaskStatusType, 
+  TaskPriorityType, 
+  CreateTaskPayload,
+  UpdateTaskPayload,
+  TaskFilters as TaskFiltersType,
+  GetTasksResponse,
+  CreateTaskResponse,
+  UpdateTaskResponse,
+  DeleteTaskResponse,
+  UpdateTaskStatusPayload,
+  SuccessResponse,
+  GetTaskDetailsPayload,
+  GetTaskDetailsResponse
+} from '@/types/task.types'
 
-const TASKS_COLLECTION = 'tasks'
+// Cloud Functions
+const createTaskFn = httpsCallable<CreateTaskPayload, CreateTaskResponse>(functions, 'createTask')
+const getTasksFn = httpsCallable<{ workspaceId?: string; viewId?: string; filters?: TaskFiltersType; sortBy?: string; sortDirection?: 'asc' | 'desc' }, GetTasksResponse>(functions, 'getTasks')
+const getTaskDetailsFn = httpsCallable<GetTaskDetailsPayload, GetTaskDetailsResponse>(functions, 'getTaskDetails')
+const updateTaskFn = httpsCallable<UpdateTaskPayload, UpdateTaskResponse>(functions, 'updateTask')
+const updateTaskStatusFn = httpsCallable<UpdateTaskStatusPayload, SuccessResponse>(functions, 'updateTaskStatus')
+const deleteTaskFn = httpsCallable<{ taskId: string }, DeleteTaskResponse>(functions, 'deleteTask')
 
+// Локальные интерфейсы для совместимости со старым кодом
 export interface TaskFilters {
   workspaceId?: string
-  projectId?: string
-  assigneeId?: string
-  status?: TaskStatus
-  priority?: TaskPriority
-  tags?: string[]
-  dueDate?: Date
-  isArchived?: boolean
+  status?: TaskStatusType[]
+  priority?: TaskPriorityType[]
+  tagsInclude?: string[]
+  tagsExclude?: string[]
+  assignee?: 'me' | 'unassigned' | string | null
+  search?: string
+  dueDateRange?: {
+    start: string | null
+    end: string | null
+  } | null
 }
 
 export interface TaskCreateData {
   title: string
   description?: string
   workspaceId: string
-  projectId?: string
-  assigneeId?: string
-  priority: TaskPriority
+  priority?: TaskPriorityType
   tags?: string[]
-  dueDate?: Date
-  estimatedDuration?: number
-  parentId?: string
+  dueDate?: string
+  pomodoroEstimatedMinutes?: number
+  approachParams?: {
+    calendar?: {
+      eventId: string | null
+      isAllDay: boolean
+      recurrenceRule: string | null
+    }
+    gtd?: {
+      context: string | null
+      nextAction: boolean
+      projectLink: string | null
+      waitingFor: string | null
+    }
+    eisenhower?: {
+      urgency: number
+      importance: number
+    }
+    frog?: {
+      isFrog: boolean
+      difficulty: 'EASY' | 'MEDIUM' | 'HARD'
+    }
+  } | null
 }
 
 export class TaskService {
-  // Create a new task
+  // Создание новой задачи
   static async createTask(
     userId: string,
     taskData: TaskCreateData
-  ): Promise<string> {
+  ): Promise<TaskDocument> {
     try {
-      const taskRef = collection(db, TASKS_COLLECTION)
-      
-      const task: any = {
+      const payload: CreateTaskPayload = {
         title: taskData.title,
+        description: taskData.description || null,
         workspaceId: taskData.workspaceId,
-        createdById: userId,
-        status: 'TODO',
-        priority: taskData.priority,
+        priority: taskData.priority || 'MEDIUM',
         tags: taskData.tags || [],
-        pomodoroCount: 0,
-        attachments: [],
-        comments: [],
-        dependencies: [],
-        customFields: {},
-        isArchived: false,
+        dueDate: taskData.dueDate || null,
+        pomodoroEstimatedMinutes: taskData.pomodoroEstimatedMinutes || null,
+        approachParams: taskData.approachParams || null
       }
 
-      if (taskData.description !== undefined) task.description = taskData.description
-      if (taskData.projectId !== undefined) task.projectId = taskData.projectId
-      if (taskData.assigneeId !== undefined) task.assigneeId = taskData.assigneeId
-      // --- ИСПРАВЛЕНО ЗДЕСЬ ---
-      if (taskData.parentId !== undefined) task.parentId = taskData.parentId
-      // ------------------------
-      if (taskData.dueDate) task.dueDate = new Date(taskData.dueDate)
-      if (taskData.estimatedDuration !== undefined) task.estimatedDuration = taskData.estimatedDuration
-
-      const docRef = await addDoc(taskRef, {
-        ...task,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      })
-
-      return docRef.id
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
+      const result = await createTaskFn(payload)
+      return result.data.task
+    } catch (error: any) {
+      console.error('Error creating task:', error)
+      throw new Error(error.message || 'Failed to create task')
     }
   }
 
-  // Get task by ID
-  static async getTask(taskId: string): Promise<Task | null> {
+  // Получение задачи по ID
+  static async getTask(taskId: string): Promise<TaskDocument | null> {
     try {
-      const taskRef = doc(db, TASKS_COLLECTION, taskId)
-      const taskSnap = await getDoc(taskRef)
-      
-      if (taskSnap.exists()) {
-        const data = taskSnap.data()
-        return {
-          id: taskSnap.id,
-          ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date(),
-          dueDate: data.dueDate?.toDate(),
-          completedAt: data.completedAt?.toDate(),
-        } as Task
+      const result = await getTaskDetailsFn({ taskId })
+      return result.data.task
+    } catch (error: any) {
+      console.error('Error getting task:', error)
+      if (error.code === 'functions/not-found') {
+        return null
       }
-      
-      return null
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
+      throw new Error(error.message || 'Failed to get task')
     }
   }
 
-  // Get tasks with filters and pagination
+  // Получение списка задач с фильтрами
   static async getTasks(
-    filters: TaskFilters = {},
-    pageSize: number = 20,
-    lastDoc?: any
-  ): Promise<PaginatedResponse<Task>> {
+    workspaceId?: string,
+    viewId?: string,
+    filters?: TaskFilters,
+    sortBy?: string,
+    sortDirection?: 'asc' | 'desc'
+  ): Promise<TaskDocument[]> {
     try {
-      let q = query(collection(db, TASKS_COLLECTION))
-
-      // Apply filters
-      if (filters.workspaceId) {
-        q = query(q, where('workspaceId', '==', filters.workspaceId))
-      }
-      if (filters.projectId) {
-        q = query(q, where('projectId', '==', filters.projectId))
-      }
-      if (filters.assigneeId) {
-        q = query(q, where('assigneeId', '==', filters.assigneeId))
-      }
-      if (filters.status) {
-        q = query(q, where('status', '==', filters.status))
-      }
-      if (filters.priority) {
-        q = query(q, where('priority', '==', filters.priority))
-      }
-      if (filters.isArchived !== undefined) {
-        q = query(q, where('isArchived', '==', filters.isArchived))
+      const payload = {
+        workspaceId,
+        viewId,
+        filters: filters ? {
+          status: filters.status,
+          priority: filters.priority,
+          tagsInclude: filters.tagsInclude,
+          tagsExclude: filters.tagsExclude,
+          assignee: filters.assignee,
+          search: filters.search,
+          dueDateRange: filters.dueDateRange ? {
+            start: filters.dueDateRange.start,
+            end: filters.dueDateRange.end,
+            type: 'due' as const
+          } : null
+        } as TaskFiltersType : undefined,
+        sortBy,
+        sortDirection
       }
 
-      // Order by creation date (newest first)
-      q = query(q, orderBy('createdAt', 'desc'))
-
-      // Pagination
-      if (lastDoc) {
-        q = query(q, startAfter(lastDoc))
-      }
-      q = query(q, limit(pageSize + 1)) // Get one extra to check if there are more
-
-      const querySnapshot = await getDocs(q)
-      const tasks: Task[] = []
-      const docs = querySnapshot.docs
-
-      docs.slice(0, pageSize).forEach((doc) => {
-        const data = doc.data()
-        tasks.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date(),
-          dueDate: data.dueDate?.toDate(),
-          completedAt: data.completedAt?.toDate(),
-        } as Task)
-      })
-
-      const hasNext = docs.length > pageSize
-      const hasPrev = !!lastDoc
-
-      return {
-        items: tasks,
-        total: tasks.length, // Note: Firestore doesn't provide total count efficiently
-        page: 1, // We don't track page numbers with cursor pagination
-        limit: pageSize,
-        hasNext,
-        hasPrev,
-      }
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
+      const result = await getTasksFn(payload)
+      return result.data.tasks
+    } catch (error: any) {
+      console.error('Error getting tasks:', error)
+      throw new Error(error.message || 'Failed to get tasks')
     }
   }
 
-  // Update task
-  static async updateTask(taskId: string, updates: Partial<Task>): Promise<void> {
+  // Обновление задачи
+  static async updateTask(taskId: string, updates: Partial<TaskCreateData>): Promise<TaskDocument> {
     try {
-      const taskRef = doc(db, TASKS_COLLECTION, taskId)
-      // Убираем undefined поля из updates
-      const cleanUpdates: any = {}
-      Object.keys(updates).forEach(key => {
-        if (updates[key as keyof Task] !== undefined) {
-          cleanUpdates[key] = updates[key as keyof Task]
-        }
-      })
-      
-      await updateDoc(taskRef, {
-        ...cleanUpdates,
-        updatedAt: serverTimestamp(),
-      })
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
+      const payload: UpdateTaskPayload = {
+        taskId,
+        title: updates.title,
+        description: updates.description,
+        priority: updates.priority,
+        dueDate: updates.dueDate,
+        tags: updates.tags,
+        pomodoroEstimatedMinutes: updates.pomodoroEstimatedMinutes,
+        approachParams: updates.approachParams
+      }
+
+      const result = await updateTaskFn(payload)
+      return result.data.task
+    } catch (error: any) {
+      console.error('Error updating task:', error)
+      throw new Error(error.message || 'Failed to update task')
     }
   }
 
-  // Update task status
-  static async updateTaskStatus(taskId: string, status: TaskStatus): Promise<void> {
+  // Обновление статуса задачи
+  static async updateTaskStatus(
+    taskId: string, 
+    status: TaskStatusType, 
+    workspaceId: string
+  ): Promise<void> {
     try {
-      const taskRef = doc(db, TASKS_COLLECTION, taskId)
-      const updates: any = {
-        status,
-        updatedAt: serverTimestamp(),
+      const payload: UpdateTaskStatusPayload = {
+        taskId,
+        newStatus: status,
+        workspaceId
       }
 
-      if (status === 'done') {
-        updates.completedAt = serverTimestamp()
-      }
-
-      await updateDoc(taskRef, updates)
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
+      await updateTaskStatusFn(payload)
+    } catch (error: any) {
+      console.error('Error updating task status:', error)
+      throw new Error(error.message || 'Failed to update task status')
     }
   }
 
-  // Delete task
+  // Удаление задачи
   static async deleteTask(taskId: string): Promise<void> {
     try {
-      const taskRef = doc(db, TASKS_COLLECTION, taskId)
-      await deleteDoc(taskRef)
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
+      await deleteTaskFn({ taskId })
+    } catch (error: any) {
+      console.error('Error deleting task:', error)
+      throw new Error(error.message || 'Failed to delete task')
     }
   }
 
-  // Archive/Unarchive task
-  static async archiveTask(taskId: string, isArchived: boolean): Promise<void> {
-    try {
-      const taskRef = doc(db, TASKS_COLLECTION, taskId)
-      await updateDoc(taskRef, {
-        isArchived,
-        updatedAt: serverTimestamp(),
-      })
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
-    }
-  }
-
-  // Add comment to task
-  static async addComment(
-    taskId: string,
-    userId: string,
-    content: string
-  ): Promise<void> {
-    try {
-      const taskRef = doc(db, TASKS_COLLECTION, taskId)
-      const task = await this.getTask(taskId)
-      
-      if (!task) throw new Error('Task not found')
-
-      const newComment = {
-        id: generateId(),
-        content,
-        authorId: userId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isEdited: false,
-        mentions: [], // TODO: Extract mentions from content
-      }
-
-      const updatedComments = [...task.comments, newComment]
-
-      await updateDoc(taskRef, {
-        comments: updatedComments,
-        updatedAt: serverTimestamp(),
-      })
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
-    }
-  }
-
-  // Increment pomodoro count
-  static async incrementPomodoroCount(taskId: string): Promise<void> {
-    try {
-      const taskRef = doc(db, TASKS_COLLECTION, taskId)
-      const task = await this.getTask(taskId)
-      
-      if (!task) throw new Error('Task not found')
-
-      await updateDoc(taskRef, {
-        pomodoroCount: task.pomodoroCount + 1,
-        updatedAt: serverTimestamp(),
-      })
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
-    }
-  }
-
-  // Bulk update tasks
-  static async bulkUpdateTasks(
-    updates: Array<{ id: string; data: Partial<Task> }>
-  ): Promise<void> {
-    try {
-      const batch = writeBatch(db)
-
-      updates.forEach(({ id, data }) => {
-        const taskRef = doc(db, TASKS_COLLECTION, id)
-        batch.update(taskRef, {
-          ...data,
-          updatedAt: serverTimestamp(),
-        })
-      })
-
-      await batch.commit()
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
-    }
-  }
-
-  // Get user's tasks statistics
+  // Получение статистики задач (заглушка для совместимости)
   static async getTasksStats(userId: string, workspaceId?: string): Promise<{
     total: number
     completed: number
@@ -326,50 +208,42 @@ export class TaskService {
     overdue: number
   }> {
     try {
-      const filters: TaskFilters = { isArchived: false }
-      if (workspaceId) filters.workspaceId = workspaceId
+      const tasks = await this.getTasks(workspaceId)
       
-      // Get user's assigned tasks
-      const assignedTasks = await this.getTasks({ ...filters, assigneeId: userId }, 1000)
-      
-      // Get tasks created by user
-      const createdQuery = query(
-        collection(db, TASKS_COLLECTION),
-        where('createdById', '==', userId),
-        where('isArchived', '==', false)
-      )
-      const createdSnapshot = await getDocs(createdQuery)
-      
-      const allTasks = [
-        ...assignedTasks.items,
-        ...createdSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate() || new Date(),
-          updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-          dueDate: doc.data().dueDate?.toDate(),
-          completedAt: doc.data().completedAt?.toDate(),
-        } as Task))
-      ]
-
-      // Remove duplicates
-      const uniqueTasks = allTasks.filter((task, index, self) => 
-        index === self.findIndex(t => t.id === task.id)
-      )
-
       const now = new Date()
       const stats = {
-        total: uniqueTasks.length,
-        completed: uniqueTasks.filter(task => task.status === 'done').length,
-        inProgress: uniqueTasks.filter(task => task.status === 'in_progress').length,
-        overdue: uniqueTasks.filter(task => 
-          task.dueDate && task.dueDate < now && task.status !== 'done'
-        ).length,
+        total: tasks.length,
+        completed: tasks.filter(task => task.status === 'DONE').length,
+        inProgress: tasks.filter(task => task.status === 'IN_PROGRESS').length,
+        overdue: tasks.filter(task => {
+          if (!task.dueDate || task.status === 'DONE') return false
+          const dueDate = new Date(task.dueDate)
+          return dueDate < now
+        }).length,
       }
 
       return stats
-    } catch (error) {
-      throw new Error(handleFirebaseError(error))
+    } catch (error: any) {
+      console.error('Error getting task stats:', error)
+      throw new Error(error.message || 'Failed to get task stats')
     }
+  }
+
+  // === DEPRECATED METHODS (для совместимости) ===
+  
+  static async archiveTask(taskId: string, isArchived: boolean): Promise<void> {
+    console.warn('archiveTask is deprecated and not implemented with Cloud Functions')
+  }
+
+  static async addComment(taskId: string, userId: string, content: string): Promise<void> {
+    console.warn('addComment is deprecated. Use subtasks/comments Cloud Functions instead')
+  }
+
+  static async incrementPomodoroCount(taskId: string): Promise<void> {
+    console.warn('incrementPomodoroCount is deprecated. Use pomodoro Cloud Functions instead')
+  }
+
+  static async bulkUpdateTasks(updates: Array<{ id: string; data: Partial<any> }>): Promise<void> {
+    console.warn('bulkUpdateTasks is not implemented with Cloud Functions')
   }
 }
